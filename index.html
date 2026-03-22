@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CLIX — Build Anything. One Prompt.</title>
+  <meta name="description" content="Generate production-ready websites instantly with AI. Free. Fast. Powerful." />
+  <meta name="keywords" content="AI website builder, free AI website generator, HTML CSS JS generator" />
+  <meta name="author" content="CLIX" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#02000a" />
+  <meta property="og:title" content="CLIX — Build Anything. One Prompt." />
+  <meta property="og:description" content="Generate full websites instantly with AI. Free. Fast. Powerful." />
+  <meta property="og:type" content="website" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"CLIX","description":"AI-powered website builder","applicationCategory":"DeveloperApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&family=Orbitron:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%2302000a'/><text y='74' x='50' text-anchor='middle' font-size='58' fill='%2300f5ff'>✦</text></svg>" />
+</head>
+<body>
+
+  <!-- Cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-trail" id="cursorTrail"></div>
+
+  <!-- Animated background canvas -->
+  <canvas class="bg-canvas" id="bgCanvas"></canvas>
+
+  <!-- Scanlines overlay -->
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <!-- ═══════════════════════════════════
+       DAILY CAP OVERLAY
+  ═══════════════════════════════════ -->
+  <div class="overlay" id="capOverlay" style="display:none;">
+    <div class="modal-card">
+      <div class="modal-corner tl"></div>
+      <div class="modal-corner tr"></div>
+      <div class="modal-corner bl"></div>
+      <div class="modal-corner br"></div>
+      <div class="cap-icon-wrap">⚡</div>
+      <h2 class="modal-title">CLIX IS RECHARGING</h2>
+      <p class="modal-sub">We've served <span class="accent">3,000 generations</span> today. Every last one used by builders like you. We reset at midnight.</p>
+      <div class="cap-timer-wrap">
+        <div class="timer-label">// RESETS_IN</div>
+        <div class="cap-timer-display">
+          <div class="timer-seg"><span id="capHH" class="timer-num">--</span><span class="timer-unit">HRS</span></div>
+          <span class="timer-colon">:</span>
+          <div class="timer-seg"><span id="capMM" class="timer-num">--</span><span class="timer-unit">MIN</span></div>
+          <span class="timer-colon">:</span>
+          <div class="timer-seg"><span id="capSS" class="timer-num">--</span><span class="timer-unit">SEC</span></div>
+        </div>
+      </div>
+      <div class="notify-row">
+        <input type="email" class="input" id="capEmailInput" placeholder="your@email.com" />
+        <button class="btn-primary" id="capNotifyBtn">Notify me</button>
+      </div>
+      <p class="fine-print">One email. No spam. Ever.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       ANON OVERLAY
+  ═══════════════════════════════════ -->
+  <div class="overlay" id="anonOverlay" style="display:none;">
+    <div class="modal-card anon-modal">
+      <div class="modal-corner tl"></div>
+      <div class="modal-corner tr"></div>
+      <div class="modal-corner bl"></div>
+      <div class="modal-corner br"></div>
+      <div class="anon-terminal">
+        <div class="term-topbar">
+          <div class="term-dots"><span class="tdot r"></span><span class="tdot y"></span><span class="tdot g"></span></div>
+          <span class="term-filename">system.log</span>
+        </div>
+        <div class="term-body">
+          <div class="term-line">
+            <span class="tc-prompt">$</span>
+            <span class="tc-cmd"> identify_user()</span>
+          </div>
+          <div class="term-line tl-d1">
+            <span class="tc-prompt">›</span>
+            <span class="tc-warn"> WARNING: no session found</span>
+          </div>
+          <div class="term-line tl-d2">
+            <span class="tc-prompt">›</span>
+            <span class="tc-text"> user_id: </span>
+            <span class="tc-glitch" data-text="ANONYMOUS_AI">ANONYMOUS_AI</span>
+          </div>
+          <div class="term-line tl-d3">
+            <span class="tc-prompt">›</span>
+            <span class="tc-muted"> access_level: </span>
+            <span class="tc-danger">RESTRICTED</span>
+          </div>
+          <div class="term-line tl-d4">
+            <span class="tc-prompt">›</span>
+            <span class="tc-blink"> ▋</span>
+          </div>
+        </div>
+      </div>
+      <h3 class="modal-title" style="font-size:22px;margin-bottom:8px;">WE SEE YOU.</h3>
+      <p class="modal-sub">Create a free account to start building. Takes 30 seconds.</p>
+      <div class="anon-btns">
+        <button class="btn-primary" id="anonSignupBtn">Create account →</button>
+        <button class="btn-ghost" id="anonDismissBtn">I already have one</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       NAVBAR
+  ═══════════════════════════════════ -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-logo">
+      <span class="logo-mark">✦</span>
+      <span class="logo-text">CLIX</span>
+      <span class="logo-tag">// AI_BUILDER</span>
+    </div>
+    <div class="nav-center" id="navCenter">
+      <div class="global-counter" id="globalCounter">
+        <span class="counter-label-left">DAILY USAGE</span>
+        <div class="counter-track" id="counterTrack">
+          <div class="counter-fill" id="counterFill"></div>
+          <div class="counter-glow" id="counterGlow"></div>
+        </div>
+        <span class="counter-num" id="counterLabel">— / 3,000</span>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="quota-pill" id="quotaPill" style="display:none;">
+        <span class="quota-dot"></span>
+        <span id="quotaNum">3</span> left
+      </div>
+      <button class="theme-btn" id="themeToggle" title="Toggle theme">
+        <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
+      <button class="btn-ghost nav-logout" id="logoutBtn" style="display:none;">[ logout ]</button>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════
+       SCREEN: HERO
+  ═══════════════════════════════════ -->
+  <section class="screen" id="screenHero">
+    <div class="hero-wrap">
+      <div class="hero-left">
+
+        <div class="hero-eyebrow">
+          <span class="eyebrow-line"></span>
+          <span class="eyebrow-text">// FREE_AI_WEBSITE_BUILDER</span>
+          <span class="eyebrow-dot"></span>
+        </div>
+
+        <h1 class="hero-title">
+          <span class="ht-line ht-1">BUILD</span>
+          <span class="ht-line ht-2">ANYTHING.</span>
+          <span class="ht-line ht-3">ONE <span class="ht-accent">PROMPT.</span></span>
+        </h1>
+
+        <p class="hero-desc">
+          Describe your site. CLIX generates production-ready HTML, CSS &amp; JS instantly — powered by our enterprise-grade AI engine so you <em>never</em> hit a wall.
+        </p>
+
+        <div class="hero-actions">
+          <button class="btn-hero" id="heroGetStarted">
+            <span class="btn-hero-bg"></span>
+            <span class="btn-hero-text">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              START BUILDING FREE
+            </span>
+          </button>
+          <div class="hero-badges">
+            <span class="hbadge">⚡ No credit card</span>
+            <span class="hbadge">⚡ 3 builds/day</span>
+            <span class="hbadge">⚡ 100% free</span>
+          </div>
+        </div>
+
+        <div class="hero-stats">
+          <div class="hstat">
+            <span class="hstat-num" id="liveCounter">—</span>
+            <span class="hstat-label">BUILT TODAY</span>
+          </div>
+          <div class="hstat-divider"></div>
+          <div class="hstat">
+            <span class="hstat-num">3K</span>
+            <span class="hstat-label">DAILY CAP</span>
+          </div>
+          <div class="hstat-divider"></div>
+          <div class="hstat">
+            <span class="hstat-num">∞</span>
+            <span class="hstat-label">POSSIBILITIES</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="hero-right">
+        <div class="hero-terminal">
+          <div class="ht-topbar">
+            <div class="ht-dots"><span class="tdot r"></span><span class="tdot y"></span><span class="tdot g"></span></div>
+            <span class="ht-filename">clix_output.html</span>
+            <span class="ht-status">● LIVE</span>
+          </div>
+          <div class="ht-body">
+            <div class="ht-line"><span class="hl-dim">001</span> <span class="hl-tag">&lt;!DOCTYPE</span> <span class="hl-attr">html</span><span class="hl-tag">&gt;</span></div>
+            <div class="ht-line"><span class="hl-dim">002</span> <span class="hl-tag">&lt;html</span> <span class="hl-attr">lang</span>=<span class="hl-val">"en"</span><span class="hl-tag">&gt;</span></div>
+            <div class="ht-line"><span class="hl-dim">003</span> <span class="hl-tag indent1">&lt;head&gt;</span></div>
+            <div class="ht-line"><span class="hl-dim">004</span> <span class="hl-comment indent2">&lt;!-- ✦ Built with CLIX --&gt;</span></div>
+            <div class="ht-line"><span class="hl-dim">005</span> <span class="hl-tag indent2">&lt;title&gt;</span><span class="hl-text">My Portfolio</span><span class="hl-tag">&lt;/title&gt;</span></div>
+            <div class="ht-line"><span class="hl-dim">006</span> <span class="hl-tag indent1">&lt;/head&gt;</span></div>
+            <div class="ht-line"><span class="hl-dim">007</span> <span class="hl-tag indent1">&lt;body&gt;</span></div>
+            <div class="ht-line"><span class="hl-dim">008</span> <span class="hl-tag indent2">&lt;section</span> <span class="hl-attr">class</span>=<span class="hl-val">"hero"</span><span class="hl-tag">&gt;</span></div>
+            <div class="ht-line"><span class="hl-dim">009</span> <span class="hl-tag indent3">&lt;h1&gt;</span><span class="hl-typing">Generating...</span><span class="hl-cursor">▋</span></div>
+            <div class="ht-line"><span class="hl-dim">010</span> <span class="hl-tag indent2">&lt;/section&gt;</span></div>
+          </div>
+          <div class="ht-footer">
+            <span class="htf-item">UTF-8</span>
+            <span class="htf-sep">|</span>
+            <span class="htf-item">HTML</span>
+            <span class="htf-sep">|</span>
+            <span class="htf-item htf-accent">AI READY</span>
+          </div>
+        </div>
+
+        <!-- Floating feature cards -->
+        <div class="float-card fc-1">
+          <span class="fc-icon">🎨</span>
+          <div><span class="fc-title">Full CSS</span><span class="fc-sub">Responsive design</span></div>
+        </div>
+        <div class="float-card fc-2">
+          <span class="fc-icon">⚡</span>
+          <div><span class="fc-title">Instant</span><span class="fc-sub">Zero wait time</span></div>
+        </div>
+        <div class="float-card fc-3">
+          <span class="fc-icon">📦</span>
+          <div><span class="fc-title">ZIP Export</span><span class="fc-sub">Download ready</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       SCREEN: CREATE ACCOUNT
+  ═══════════════════════════════════ -->
+  <section class="screen auth-screen" id="screenCreateAccount" style="display:none;">
+    <div class="auth-wrap">
+      <div class="auth-card">
+        <div class="modal-corner tl"></div>
+        <div class="modal-corner tr"></div>
+        <div class="modal-corner bl"></div>
+        <div class="modal-corner br"></div>
+
+        <div class="auth-logo">
+          <span class="logo-mark">✦</span>
+          <span class="logo-text">CLIX</span>
+        </div>
+
+        <div class="auth-step-indicator">
+          <div class="step-dot active" id="stepDot1"></div>
+          <div class="step-line"></div>
+          <div class="step-dot" id="stepDot2"></div>
+        </div>
+
+        <h2 class="auth-title">CREATE ACCOUNT</h2>
+        <p class="auth-sub">Enter your email to get started. We'll send you a secure 6-digit code.</p>
+
+        <div class="input-group">
+          <label class="input-label">// EMAIL_ADDRESS</label>
+          <div class="input-wrap">
+            <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+            <input type="email" class="input" id="emailInput" placeholder="you@example.com" autocomplete="email" />
+          </div>
+        </div>
+
+        <div class="terms-row">
+          <input type="checkbox" class="terms-chk" id="termsChk" />
+          <label class="terms-lbl" for="termsChk">
+            I agree to the <a href="#" class="link">Terms of Use</a> and <a href="#" class="link">Privacy Policy</a>
+          </label>
+        </div>
+
+        <button class="btn-primary btn-full" id="sendOtpBtn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          SEND VERIFICATION CODE
+        </button>
+
+        <div class="auth-err" id="emailErr" style="display:none;"></div>
+
+        <p class="auth-switch">Already have an account? <button class="btn-link" id="switchToLoginBtn">Sign in</button></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       SCREEN: VERIFY OTP
+  ═══════════════════════════════════ -->
+  <section class="screen auth-screen" id="screenVerifyOtp" style="display:none;">
+    <div class="auth-wrap">
+      <div class="auth-card">
+        <div class="modal-corner tl"></div>
+        <div class="modal-corner tr"></div>
+        <div class="modal-corner bl"></div>
+        <div class="modal-corner br"></div>
+
+        <div class="auth-logo">
+          <span class="logo-mark">✦</span>
+          <span class="logo-text">CLIX</span>
+        </div>
+
+        <div class="auth-step-indicator">
+          <div class="step-dot done" id="stepDot1b"></div>
+          <div class="step-line step-line-done"></div>
+          <div class="step-dot active" id="stepDot2b"></div>
+        </div>
+
+        <h2 class="auth-title">CHECK INBOX</h2>
+        <p class="auth-sub">We sent a 6-digit code to <strong id="otpEmailShow" class="accent"></strong></p>
+
+        <div class="otp-row" id="otpRow">
+          <input type="text" inputmode="numeric" maxlength="1" class="otp-cell" data-idx="0" />
+          <input type="text" inputmode="numeric" maxlength="1" class="otp-cell" data-idx="1" />
+          <input type="text" inputmode="numeric" maxlength="1" class="otp-cell" data-idx="2" />
+          <span class="otp-sep">—</span>
+          <input type="text" inputmode="numeric" maxlength="1" class="otp-cell" data-idx="3" />
+          <input type="text" inputmode="numeric" maxlength="1" class="otp-cell" data-idx="4" />
+          <input type="text" inputmode="numeric" maxlength="1" class="otp-cell" data-idx="5" />
+        </div>
+
+        <div class="otp-meta">
+          <span class="otp-expire">Expires in <span id="otpCountdown" class="accent">5:00</span></span>
+          <button class="btn-link" id="resendBtn">Resend code</button>
+        </div>
+
+        <button class="btn-primary btn-full" id="verifyOtpBtn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          VERIFY &amp; ENTER CLIX
+        </button>
+
+        <div class="auth-err" id="otpErr" style="display:none;"></div>
+        <button class="btn-ghost btn-full" id="authBackBtn" style="margin-top:10px;">← Back</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       SCREEN: BUILDER
+  ═══════════════════════════════════ -->
+  <section class="screen screen-builder" id="screenBuilder" style="display:none;">
+
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+      <span></span><span></span><span></span>
+    </button>
+
+    <div class="builder-wrap">
+
+      <!-- SIDEBAR -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-inner">
+
+          <div class="sb-user">
+            <div class="sb-avatar" id="sbAvatar">?</div>
+            <div class="sb-info">
+              <span class="sb-email" id="sbEmail">user@email.com</span>
+              <span class="sb-quota" id="sbQuota">3 builds left today</span>
+            </div>
+          </div>
+
+          <div class="sb-divider"></div>
+
+          <div class="sb-section">
+            <p class="sb-label">// SITE_TYPE</p>
+            <div class="type-grid" id="typeGrid">
+              <button class="type-btn active" data-type="landing"><span>🏠</span><span>Landing</span></button>
+              <button class="type-btn" data-type="portfolio"><span>🎨</span><span>Portfolio</span></button>
+              <button class="type-btn" data-type="blog"><span>📝</span><span>Blog</span></button>
+              <button class="type-btn" data-type="ecommerce"><span>🛒</span><span>Store</span></button>
+              <button class="type-btn" data-type="dashboard"><span>📊</span><span>Dashboard</span></button>
+              <button class="type-btn" data-type="custom"><span>⚡</span><span>Custom</span></button>
+            </div>
+          </div>
+
+          <div class="sb-divider"></div>
+
+          <div class="sb-section sb-hist">
+            <p class="sb-label">// BUILD_HISTORY</p>
+            <div class="history-list" id="historyList">
+              <div class="hist-empty" id="histEmpty">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span>No builds yet</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sb-divider"></div>
+
+          <div class="sb-ad">
+            <div class="ad-placeholder">
+              <span class="ad-tag">// ADVERTISEMENT</span>
+              <!-- INSERT ADSTERRA 300x250 SCRIPT HERE -->
+            </div>
+          </div>
+
+        </div>
+      </aside>
+
+      <!-- MAIN -->
+      <main class="builder-main">
+
+        <!-- Prompt card -->
+        <div class="prompt-card" id="promptCard">
+          <div class="prompt-header">
+            <div>
+              <h2 class="prompt-title">// WHAT_ARE_WE_BUILDING</h2>
+              <p class="prompt-hint">Describe your site in detail — the more specific, the better</p>
+            </div>
+            <div class="model-badge" id="modelBadge">
+              <span class="model-dot"></span>
+              <span id="modelName">AI_ENGINE_READY</span>
+            </div>
+          </div>
+
+          <div class="prompt-box" id="promptBox">
+            <textarea class="prompt-ta" id="promptInput"
+              placeholder="e.g. A dark minimal portfolio for a photographer named Zara. Full-screen hero image, smooth scroll, minimal navigation, contact form at the bottom..."
+              rows="4" maxlength="1000"></textarea>
+            <div class="prompt-foot">
+              <span class="char-count" id="charCount">0 / 1000</span>
+              <button class="btn-ghost btn-xs" id="clearBtn">✕ Clear</button>
+            </div>
+          </div>
+
+          <div class="gate-notice" id="gateNotice">
+            <span class="gate-icon">⚡</span>
+            Watch the short ad below to unlock your generation
+          </div>
+
+          <div class="rewarded-wrap" id="rewardedWrap" style="display:none;">
+            <span class="rewarded-label">// SPONSORED · WATCH_TO_UNLOCK</span>
+            <div class="rewarded-inner" id="rewardedContainer">
+              <span class="ad-placeholder-text">Ad loads here once activated</span>
+              <!-- DEV ONLY — remove in production -->
+              <button class="btn-ghost btn-xs dev-btn" id="devAdBtn">▶ Simulate ad complete (dev only)</button>
+            </div>
+          </div>
+
+          <button class="btn-generate" id="generateBtn" disabled>
+            <span class="gen-inner">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <span id="genBtnText">GENERATE WEBSITE</span>
+            </span>
+            <span class="gen-scanline"></span>
+          </button>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-card" id="progressCard" style="display:none;">
+          <div class="prog-top">
+            <span class="prog-title">// CLIX_IS_BUILDING</span>
+            <span class="prog-model" id="progressModel">INITIALIZING...</span>
+          </div>
+          <div class="prog-track"><div class="prog-fill" id="progressFill"></div></div>
+          <div class="prog-steps">
+            <div class="p-step active" id="ps1"><span class="ps-dot"></span>Selecting AI model</div>
+            <div class="p-step" id="ps2"><span class="ps-dot"></span>Generating HTML structure</div>
+            <div class="p-step" id="ps3"><span class="ps-dot"></span>Writing CSS styles</div>
+            <div class="p-step" id="ps4"><span class="ps-dot"></span>Adding JavaScript</div>
+            <div class="p-step" id="ps5"><span class="ps-dot"></span>Finalising output</div>
+          </div>
+        </div>
+
+        <!-- Skeleton -->
+        <div class="skeleton-card" id="skeletonCard" style="display:none;" aria-hidden="true">
+          <div class="skel skel-title"></div>
+          <div class="skel skel-bar"></div>
+          <div class="skel skel-bar skel-short"></div>
+          <div class="skel skel-preview"></div>
+        </div>
+
+        <!-- Output -->
+        <div class="output-card" id="outputCard" style="display:none;">
+          <div class="output-toolbar">
+            <div class="out-tabs">
+              <button class="out-tab active" id="tabPreviewBtn">[ PREVIEW ]</button>
+              <button class="out-tab" id="tabCodeBtn">[ CODE ]</button>
+            </div>
+            <div class="out-actions">
+              <button class="btn-ghost btn-xs" id="copyBtn">⎘ Copy</button>
+              <button class="btn-ghost btn-xs" id="shareBtn">↗ Share</button>
+              <button class="btn-primary btn-xs" id="downloadBtn">↓ ZIP</button>
+            </div>
+          </div>
+
+          <div class="out-panel" id="tabPreview">
+            <iframe class="preview-frame" id="previewFrame" sandbox="allow-scripts allow-same-origin" title="Generated website preview"></iframe>
+            <div class="preview-wm">Built with CLIX ✦</div>
+          </div>
+
+          <div class="out-panel" id="tabCode" style="display:none;">
+            <div class="code-viewer">
+              <div class="code-file-tabs">
+                <button class="cf-tab active" data-file="html">index.html</button>
+                <button class="cf-tab" data-file="css">style.css</button>
+                <button class="cf-tab" data-file="js">script.js</button>
+              </div>
+              <pre class="code-pre" id="codePre"><code id="codeContent"></code></pre>
+            </div>
+          </div>
+
+          <!-- Share modal -->
+          <div class="share-modal" id="shareModal" style="display:none;">
+            <div class="share-inner">
+              <div class="modal-corner tl"></div><div class="modal-corner tr"></div>
+              <div class="modal-corner bl"></div><div class="modal-corner br"></div>
+              <h3 class="share-title">// SHARE_YOUR_BUILD</h3>
+              <p class="share-sub">Show the world what you made with CLIX</p>
+              <div class="share-btns">
+                <a class="share-btn sb-x" id="shareX" href="#" target="_blank" rel="noopener">𝕏 Post on X</a>
+                <a class="share-btn sb-wa" id="shareWa" href="#" target="_blank" rel="noopener">WhatsApp</a>
+                <a class="share-btn sb-tg" id="shareTg" href="#" target="_blank" rel="noopener">Telegram</a>
+              </div>
+              <button class="btn-ghost btn-full" id="shareClose">Close</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error -->
+        <div class="error-card" id="errorCard" style="display:none;">
+          <div class="error-inner">
+            <div class="error-icon">⚠</div>
+            <h3 class="error-title">// ALL_MODELS_RESTING</h3>
+            <p class="error-msg" id="errorMsg">Every AI model hit its rate limit simultaneously. This is rare — try again in a few minutes.</p>
+            <button class="btn-primary" id="retryBtn">↺ Try Again</button>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </section>
+
+  <!-- Toasts -->
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <!-- JSZip -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- Main script -->
+  <script type="module" src="script.js"></script>
+
+</body>
+</html>
