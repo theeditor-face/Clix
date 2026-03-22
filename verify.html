@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Verify Email — CLIX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23080812'/><text y='75' x='50' text-anchor='middle' font-size='62' fill='%232eb9df'>✦</text></svg>"/>
+  <style>
+    :root{--bg:#080812;--bg-card:#0d0d1a;--bg-hover:#111122;--bg-input:#0a0a16;--border:rgba(255,255,255,.07);--border-hi:rgba(46,185,223,.22);--t1:#e8e8f0;--t2:#7878a0;--t3:#3a3a58;--ac:#2eb9df;--ac-dim:rgba(46,185,223,.09);--ac-glow:rgba(46,185,223,.30);--red:#f7516a;--red-dim:rgba(247,81,106,.10);--green:#1de9b0;--green-dim:rgba(29,233,176,.10);--fd:'Bricolage Grotesque',sans-serif;--fb:'Inter',sans-serif;--fm:'JetBrains Mono',monospace;--r:10px}
+    [data-theme=light]{--bg:#f5f5fb;--bg-card:#fff;--bg-hover:#eaeaf5;--bg-input:#f0f0fa;--border:rgba(0,0,0,.08);--border-hi:rgba(26,127,196,.22);--t1:#09090f;--t2:#50507a;--t3:#9898b8;--ac:#1a7fc4;--ac-dim:rgba(26,127,196,.08);--ac-glow:rgba(26,127,196,.22)}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh;display:flex;flex-direction:column;transition:background .3s,color .3s}
+    a{text-decoration:none;color:inherit}
+    button{cursor:pointer;font-family:var(--fb);background:none;border:none;color:inherit}
+    ::selection{background:var(--ac-dim);color:var(--ac)}
+
+    .bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:68px 68px}
+    [data-theme=light] .bg-grid{background-image:linear-gradient(rgba(0,0,0,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.04) 1px,transparent 1px)}
+
+    .topbar{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:18px 40px}
+    .brand{display:flex;align-items:center;gap:10px}
+    .brand-icon{width:32px;height:32px;border-radius:8px;background:var(--ac);display:flex;align-items:center;justify-content:center;font-size:16px;color:#080812;font-weight:900;box-shadow:0 0 16px var(--ac-glow);flex-shrink:0}
+    .brand-name{font-family:var(--fd);font-size:19px;font-weight:800;letter-spacing:.07em}
+    .theme-btn{width:34px;height:34px;border-radius:50%;background:var(--bg-hover);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--t2);transition:color .15s,transform .2s}
+    .theme-btn:hover{color:var(--t1);transform:rotate(20deg)}
+
+    .main{position:relative;z-index:1;flex:1;display:flex;align-items:center;justify-content:center;padding:20px}
+
+    .card{width:100%;max-width:440px;background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:42px 38px;box-shadow:0 20px 70px rgba(0,0,0,.4);position:relative;overflow:hidden;animation:slideUp .4s cubic-bezier(.34,1.56,.64,1) both}
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--ac),#7c6af7)}
+    @keyframes slideUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+
+    .card-icon{width:60px;height:60px;border-radius:14px;background:var(--ac-dim);border:1px solid var(--border-hi);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 22px}
+    .card-title{font-family:var(--fd);font-size:24px;font-weight:800;text-align:center;margin-bottom:8px}
+    .card-sub{font-size:14px;color:var(--t2);text-align:center;line-height:1.6;margin-bottom:28px}
+    .card-email{color:var(--t1);font-weight:600}
+
+    .steps{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:26px}
+    .sdot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:var(--fm);transition:all .3s}
+    .sdot.done{background:var(--green);color:#080812}
+    .sdot.active{background:var(--ac);color:#080812}
+    .sdot.pending{background:var(--bg-hover);border:1px solid var(--border);color:var(--t3)}
+    .sline{width:36px;height:1px}
+    .sline.done{background:var(--green)}
+    .sline.pending{background:var(--border)}
+
+    .otp-label{font-family:var(--fm);font-size:11px;color:var(--t3);text-align:center;letter-spacing:.08em;margin-bottom:14px}
+    .otp-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px}
+    .otp-cell{width:50px;height:58px;background:var(--bg-input);border:1.5px solid var(--border);border-radius:var(--r);color:var(--t1);font-family:var(--fd);font-size:22px;font-weight:800;text-align:center;outline:none;caret-color:transparent;transition:border-color .15s,box-shadow .15s,transform .1s}
+    .otp-cell:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--ac-dim);transform:scale(1.04)}
+    .otp-cell.filled{border-color:var(--ac)}
+    .otp-cell.error{border-color:var(--red);box-shadow:0 0 0 3px var(--red-dim);animation:shake .35s}
+    .otp-sep{font-family:var(--fm);font-size:18px;color:var(--t3)}
+    @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+
+    .otp-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+    .otp-timer{font-family:var(--fm);font-size:12px;color:var(--t3)}
+    .otp-timer span{color:var(--ac)}
+    .otp-timer span.exp{color:var(--red)}
+    .resend-btn{font-size:13px;font-weight:600;color:var(--ac);text-decoration:underline;transition:opacity .15s}
+    .resend-btn:hover{opacity:.7}
+    .resend-btn:disabled{opacity:.35;cursor:not-allowed}
+
+    .form-err{display:none;padding:11px 13px;background:var(--red-dim);border:1px solid rgba(247,81,106,.22);border-radius:var(--r);font-size:13px;color:var(--red);line-height:1.5;margin-bottom:14px}
+    .form-err.show{display:block}
+    .form-ok{display:none;padding:11px 13px;background:var(--green-dim);border:1px solid rgba(29,233,176,.22);border-radius:var(--r);font-size:13px;color:var(--green);margin-bottom:14px}
+    .form-ok.show{display:block}
+
+    .btn-verify{width:100%;padding:14px;background:var(--ac);color:#080812;border-radius:var(--r);font-family:var(--fd);font-size:15px;font-weight:700;letter-spacing:.03em;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .15s,box-shadow .15s,opacity .15s;margin-bottom:14px;position:relative;overflow:hidden}
+    .btn-verify::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.18),transparent);opacity:0;transition:opacity .15s}
+    .btn-verify:hover{transform:translateY(-2px);box-shadow:0 12px 36px var(--ac-glow)}
+    .btn-verify:hover::after{opacity:1}
+    .btn-verify:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+    .spinner{width:17px;height:17px;border:2px solid rgba(8,8,18,.3);border-top-color:#080812;border-radius:50%;animation:spin .7s linear infinite;display:none}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .back-link{text-align:center;font-size:13px;color:var(--t2)}
+    .back-link a{color:var(--ac);font-weight:600}
+
+    /* Success overlay */
+    .success-state{display:none;text-align:center}
+    .success-icon{width:62px;height:62px;border-radius:50%;background:var(--green-dim);border:1px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 18px;animation:popIn .4s cubic-bezier(.34,1.56,.64,1) both}
+    @keyframes popIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+    .success-title{font-family:var(--fd);font-size:22px;font-weight:800;margin-bottom:8px}
+    .success-sub{font-size:14px;color:var(--t2);margin-bottom:22px}
+    .redirect-bar{width:100%;height:3px;background:var(--bg-hover);border-radius:99px;overflow:hidden}
+    .redirect-fill{height:100%;width:0%;background:var(--ac);border-radius:99px;transition:width 2s linear}
+
+    @media(max-width:480px){.topbar{padding:16px 20px}.card{padding:30px 18px}.otp-cell{width:42px;height:52px;font-size:18px}}
+  </style>
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <div class="topbar">
+    <a href="index.html" class="brand">
+      <div class="brand-icon">✦</div>
+      <span class="brand-name">CLIX</span>
+    </a>
+    <button class="theme-btn" id="themeBtn">🌙</button>
+  </div>
+
+  <main class="main">
+    <div class="card">
+      <!-- OTP state -->
+      <div id="otpState">
+        <div class="card-icon">📬</div>
+        <h1 class="card-title">Check your inbox</h1>
+        <p class="card-sub">We sent a 6-digit code to<br><span class="card-email" id="emailDisplay">your email</span></p>
+
+        <div class="steps">
+          <div class="sdot done">✓</div>
+          <div class="sline done"></div>
+          <div class="sdot active">2</div>
+          <div class="sline pending"></div>
+          <div class="sdot pending">3</div>
+        </div>
+
+        <p class="otp-label">ENTER VERIFICATION CODE</p>
+
+        <div class="otp-row" id="otpRow">
+          <input type="text" inputmode="numeric" maxlength="1" class="otp-cell" data-idx="0" aria-label="Digit 1"/>
+          <input type="text" inputmode="numeric" maxlength="1" class="otp-cell" data-idx="1" aria-label="Digit 2"/>
+          <input type="text" inputmode="numeric" maxlength="1" class="otp-cell" data-idx="2" aria-label="Digit 3"/>
+          <span class="otp-sep">—</span>
+          <input type="text" inputmode="numeric" maxlength="1" class="otp-cell" data-idx="3" aria-label="Digit 4"/>
+          <input type="text" inputmode="numeric" maxlength="1" class="otp-cell" data-idx="4" aria-label="Digit 5"/>
+          <input type="text" inputmode="numeric" maxlength="1" class="otp-cell" data-idx="5" aria-label="Digit 6"/>
+        </div>
+
+        <div class="otp-meta">
+          <span class="otp-timer">Expires in <span id="timerTxt">5:00</span></span>
+          <button class="resend-btn" id="resendBtn" disabled>Resend code</button>
+        </div>
+
+        <div class="form-err" id="formErr"></div>
+        <div class="form-ok" id="formOk"></div>
+
+        <button class="btn-verify" id="verifyBtn">
+          <div class="spinner" id="spinner"></div>
+          <span id="verifyTxt">Verify and continue</span>
+          <svg id="verifyArrow" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
+
+        <p class="back-link">Wrong email? <a href="signup.html">Go back</a></p>
+      </div>
+
+      <!-- Success state -->
+      <div class="success-state" id="successState">
+        <div class="success-icon">✓</div>
+        <h2 class="success-title">You're verified!</h2>
+        <p class="success-sub">Taking you to the builder now...</p>
+        <div class="redirect-bar"><div class="redirect-fill" id="redirectFill"></div></div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+    const sb = createClient('https://kikimirbzsnlcydzjdco.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtpa2ltaXJienNubGN5ZHpqZGNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDcxOTgsImV4cCI6MjA4OTc4MzE5OH0.Q8Qm2_v2-1OycwjLJRBNBgAFNSlP7i3ZJtiq1qrfdtI');
+
+    // Theme
+    const html=document.documentElement;
+    const tb=document.getElementById('themeBtn');
+    const applyTheme=t=>{html.setAttribute('data-theme',t);localStorage.setItem('clix-theme',t);tb.textContent=t==='dark'?'🌙':'☀️'};
+    applyTheme(localStorage.getItem('clix-theme')||'dark');
+    tb.addEventListener('click',()=>applyTheme(html.getAttribute('data-theme')==='dark'?'light':'dark'));
+
+    // Already logged in
+    const {data:{session}}=await sb.auth.getSession();
+    if(session?.user)window.location.href='builder.html';
+
+    // Get email
+    const email=sessionStorage.getItem('clix-verify-email')||'';
+    if(!email)window.location.href='signup.html';
+    document.getElementById('emailDisplay').textContent=email;
+
+    // Timer
+    let timeLeft=300;
+    const timerTxt=document.getElementById('timerTxt');
+    const resendBtn=document.getElementById('resendBtn');
+    const timerInt=setInterval(()=>{
+      timeLeft--;
+      const m=Math.floor(timeLeft/60),s=String(timeLeft%60).padStart(2,'0');
+      timerTxt.textContent=`${m}:${s}`;
+      if(timeLeft<=30)timerTxt.classList.add('exp');
+      if(timeLeft<=0){clearInterval(timerInt);timerTxt.textContent='Expired';resendBtn.disabled=false;showErr('Code expired. Click "Resend code".')}
+    },1000);
+    setTimeout(()=>resendBtn.disabled=false,30000);
+
+    // OTP cells
+    const cells=document.querySelectorAll('.otp-cell');
+    cells.forEach(cell=>{
+      cell.addEventListener('input',()=>{
+        cell.value=cell.value.replace(/\D/g,'').slice(-1);
+        cell.classList.toggle('filled',!!cell.value);
+        const i=parseInt(cell.dataset.idx);
+        if(cell.value&&i<5)cells[i+1].focus();
+        if([...cells].every(c=>c.value))document.getElementById('verifyBtn').click();
+      });
+      cell.addEventListener('keydown',e=>{
+        if(e.key==='Backspace'&&!cell.value){const i=parseInt(cell.dataset.idx);if(i>0){cells[i-1].focus();cells[i-1].value='';cells[i-1].classList.remove('filled')}}
+      });
+      cell.addEventListener('paste',e=>{
+        e.preventDefault();
+        const p=e.clipboardData.getData('text').replace(/\D/g,'').slice(0,6);
+        p.split('').forEach((ch,i)=>{if(cells[i]){cells[i].value=ch;cells[i].classList.add('filled')}});
+        if(p.length===6)document.getElementById('verifyBtn').click();
+      });
+    });
+    setTimeout(()=>cells[0].focus(),200);
+
+    // Helpers
+    const formErr=document.getElementById('formErr');
+    const formOk=document.getElementById('formOk');
+    const verifyBtn=document.getElementById('verifyBtn');
+    const spinner=document.getElementById('spinner');
+    const verifyTxt=document.getElementById('verifyTxt');
+    const verifyArrow=document.getElementById('verifyArrow');
+    function showErr(msg){formErr.textContent=msg;formErr.classList.add('show');formOk.classList.remove('show')}
+    function showOk(msg){formOk.textContent=msg;formOk.classList.add('show');formErr.classList.remove('show')}
+    function hideMsg(){formErr.classList.remove('show');formOk.classList.remove('show')}
+    function setLoading(on){verifyBtn.disabled=on;spinner.style.display=on?'block':'none';verifyTxt.textContent=on?'Verifying...':'Verify and continue';verifyArrow.style.display=on?'none':''}
+
+    function showSuccess(){
+      document.getElementById('otpState').style.display='none';
+      const s=document.getElementById('successState');
+      s.style.display='block';
+      setTimeout(()=>document.getElementById('redirectFill').style.width='100%',100);
+      setTimeout(()=>window.location.href='builder.html',2300);
+    }
+
+    // Verify
+    verifyBtn.addEventListener('click',async()=>{
+      hideMsg();
+      const token=[...cells].map(c=>c.value).join('');
+      if(token.length!==6){showErr('Please enter all 6 digits.');return}
+      setLoading(true);
+      try{
+        const {data,error}=await sb.auth.verifyOtp({email,token,type:'signup'});
+        if(error)throw error;
+        if(data?.user){
+          const name=sessionStorage.getItem('clix-verify-name')||'';
+          await sb.from('profiles').upsert({id:data.user.id,email:data.user.email,full_name:name,last_seen:new Date().toISOString()},{onConflict:'id'});
+        }
+        sessionStorage.removeItem('clix-verify-email');
+        sessionStorage.removeItem('clix-verify-name');
+        clearInterval(timerInt);
+        showSuccess();
+      }catch(err){
+        let msg=err.message||'Verification failed.';
+        if(msg.includes('expired')||msg.includes('invalid'))msg='Incorrect or expired code. Check your email and try again.';
+        showErr(msg);
+        cells.forEach(c=>{c.classList.add('error');setTimeout(()=>c.classList.remove('error'),500)});
+        setLoading(false);
+      }
+    });
+
+    // Resend
+    resendBtn.addEventListener('click',async()=>{
+      resendBtn.disabled=true;
+      hideMsg();
+      try{
+        await sb.auth.resend({type:'signup',email});
+        timeLeft=300;
+        timerTxt.className='';
+        cells.forEach(c=>{c.value='';c.classList.remove('filled','error')});
+        cells[0].focus();
+        showOk('✓ New code sent! Check your inbox.');
+        setTimeout(()=>resendBtn.disabled=false,30000);
+      }catch{showErr('Failed to resend. Try again.');resendBtn.disabled=false}
+    });
+  </script>
+</body>
+</html>

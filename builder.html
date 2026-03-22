@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Builder — CLIX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style>
+    :root{
+      --bg:#080812;--bg-card:#0d0d1a;--bg-hover:#111122;--bg-sb:#090914;
+      --border:rgba(255,255,255,.07);--border-hi:rgba(46,185,223,.22);
+      --t1:#e8e8f0;--t2:#7878a0;--t3:#3a3a58;
+      --ac:#2eb9df;--ac-dim:rgba(46,185,223,.09);--ac-glow:rgba(46,185,223,.30);
+      --red:#f7516a;--red-dim:rgba(247,81,106,.10);
+      --green:#1de9b0;--gold:#f5c842;--gold-dim:rgba(245,200,66,.10);
+      --fd:'Bricolage Grotesque',sans-serif;--fb:'Inter',sans-serif;--fm:'JetBrains Mono',monospace;
+      --nav-h:56px;--sb-w:220px;--r:10px;
+    }
+    [data-theme=light]{
+      --bg:#f4f4fa;--bg-card:#fff;--bg-hover:#eaeaf5;--bg-sb:#efeffa;
+      --border:rgba(0,0,0,.08);--border-hi:rgba(26,127,196,.22);
+      --t1:#09090f;--t2:#50507a;--t3:#9898b8;
+      --ac:#1a7fc4;--ac-dim:rgba(26,127,196,.08);--ac-glow:rgba(26,127,196,.22);
+      --gold-dim:rgba(180,120,0,.08);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;overflow:hidden}
+    body{font-family:var(--fb);background:var(--bg);color:var(--t1);display:flex;flex-direction:column;transition:background .3s,color .3s}
+    button{cursor:pointer;font-family:var(--fb);background:none;border:none;color:inherit}
+    a{text-decoration:none;color:inherit}
+    ::selection{background:var(--ac-dim);color:var(--ac)}
+
+    /* ── NAVBAR ────────────────────────────────── */
+    .nav{height:var(--nav-h);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:var(--bg-card);border-bottom:1px solid var(--border);z-index:100;position:relative}
+    .nav-left{display:flex;align-items:center;gap:12px}
+    .sb-toggle{width:32px;height:32px;border-radius:8px;background:var(--bg-hover);border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;flex-shrink:0}
+    .sb-toggle span{display:block;width:15px;height:1.5px;background:var(--t2);border-radius:2px;transition:all .2s}
+    .sb-toggle.open span:nth-child(1){transform:translateY(5.5px) rotate(45deg)}
+    .sb-toggle.open span:nth-child(2){opacity:0}
+    .sb-toggle.open span:nth-child(3){transform:translateY(-5.5px) rotate(-45deg)}
+    .brand{display:flex;align-items:center;gap:9px}
+    .brand-icon{width:30px;height:30px;border-radius:7px;background:var(--ac);display:flex;align-items:center;justify-content:center;font-size:15px;color:#080812;font-weight:900;flex-shrink:0}
+    .brand-name{font-family:var(--fd);font-size:18px;font-weight:800;letter-spacing:.07em}
+    .nav-sep{width:1px;height:18px;background:var(--border)}
+    .user-chip{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--t2)}
+    .user-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--ac),#7c6af7);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-weight:700;font-size:11px;color:#fff;flex-shrink:0}
+    .quota-badge{display:flex;align-items:center;gap:5px;padding:3px 9px;border-radius:99px;background:var(--ac-dim);border:1px solid var(--border-hi);font-family:var(--fm);font-size:11px;font-weight:600;color:var(--ac)}
+    .qd{width:5px;height:5px;background:var(--ac);border-radius:50%;animation:qpulse 2s ease-in-out infinite}
+    @keyframes qpulse{0%,100%{box-shadow:0 0 0 0 var(--ac-glow)}50%{box-shadow:0 0 0 4px transparent}}
+    .nav-right{display:flex;align-items:center;gap:8px}
+    .nav-btn{padding:6px 14px;border-radius:8px;font-size:13px;font-weight:500;color:var(--t2);transition:color .15s,background .15s}
+    .nav-btn:hover{color:var(--t1);background:var(--bg-hover)}
+    .nav-icon-btn{width:30px;height:30px;border-radius:8px;background:var(--bg-hover);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--t2);transition:color .15s,transform .2s}
+    .nav-icon-btn:hover{color:var(--t1);transform:rotate(18deg)}
+    .logout-btn{padding:6px 14px;border-radius:8px;font-size:13px;font-weight:500;color:var(--t2);border:1px solid var(--border);transition:all .15s}
+    .logout-btn:hover{color:var(--red);border-color:var(--red);background:var(--red-dim)}
+
+    /* ── BODY LAYOUT ───────────────────────────── */
+    .body{flex:1;display:flex;overflow:hidden}
+
+    /* ── SIDEBAR ───────────────────────────────── */
+    .sidebar{width:var(--sb-w);flex-shrink:0;background:var(--bg-sb);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:transform .25s}
+    .sb-inner{display:flex;flex-direction:column;height:100%;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+    .sb-sec{padding:14px 14px 8px}
+    .sb-label{font-family:var(--fm);font-size:9px;letter-spacing:.16em;color:var(--t3);text-transform:uppercase;margin-bottom:10px;display:block}
+    .sb-divider{height:1px;background:var(--border)}
+
+    /* Type list */
+    .type-list{display:flex;flex-direction:column;gap:2px}
+    .type-item{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:8px;font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;transition:all .15s;border:1px solid transparent}
+    .type-item:hover{background:var(--bg-hover);color:var(--t1)}
+    .type-item.active{background:var(--ac-dim);color:var(--ac);border-color:var(--border-hi)}
+    .type-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+
+    /* History */
+    .hist-sec{flex:1;overflow:hidden;display:flex;flex-direction:column;padding:14px 14px 8px}
+    .hist-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+    .hist-empty{display:flex;flex-direction:column;align-items:center;gap:7px;padding:20px 0;font-size:12px;color:var(--t3);text-align:center}
+    .hist-item{padding:10px 10px;border-radius:8px;cursor:pointer;transition:background .15s;border-left:2px solid transparent}
+    .hist-item:hover{background:var(--bg-hover);border-left-color:var(--ac)}
+    .hist-title{font-size:12px;font-weight:500;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px}
+    .hist-meta{display:flex;gap:8px;font-family:var(--fm);font-size:10px;color:var(--t3)}
+
+    /* ═══════════════════════════════════════════════
+       AD SLOTS — SIDEBAR
+       ─────────────────────────────────────────────
+       ADSTERRA SIDEBAR AD (300×250 or smaller)
+       Replace the placeholder div with your script.
+    ═══════════════════════════════════════════════ */
+    .sb-ad{padding:12px 14px;margin-top:auto}
+    .ad-box{border:1px dashed var(--border);border-radius:8px;min-height:90px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .ad-placeholder-label{font-family:var(--fm);font-size:9px;color:var(--t3);letter-spacing:.12em;text-align:center}
+
+    /* ── MAIN AREA ──────────────────────────────── */
+    .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+    /* ── PROMPT ZONE ────────────────────────────── */
+    .prompt-zone{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;overflow-y:auto}
+    .pz-greeting{font-family:var(--fd);font-size:clamp(22px,3vw,34px);font-weight:800;letter-spacing:-.01em;text-align:center;margin-bottom:8px}
+    .pz-sub{font-size:14px;color:var(--t2);text-align:center;margin-bottom:28px}
+
+    /* ═══════════════════════════════════════════════
+       AD GATE NOTICE
+    ═══════════════════════════════════════════════ */
+    .ad-gate{display:flex;align-items:center;gap:8px;width:100%;max-width:660px;padding:10px 14px;background:var(--gold-dim);border:1px solid rgba(245,200,66,.20);border-radius:8px;font-size:13px;color:var(--gold);margin-bottom:12px}
+
+    /* ═══════════════════════════════════════════════
+       AD ZONE — REWARDED AD
+       ─────────────────────────────────────────────
+       ADSTERRA REWARDED / INTERSTITIAL AD
+       ─────────────────────────────────────────────
+       When you get your Adsterra script:
+       1. Remove the simulated-ad div below
+       2. Paste your Adsterra script inside .real-ad-slot
+       3. Configure your Adsterra callback to call
+          window.onAdComplete() when the ad finishes
+       4. Remove the devSimBtn
+       ─────────────────────────────────────────────
+       The generate button is already wired to unlock
+       automatically when window.onAdComplete() fires.
+    ═══════════════════════════════════════════════ */
+    .ad-zone{width:100%;max-width:660px;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px}
+    .az-label{font-family:var(--fm);font-size:9px;letter-spacing:.14em;color:var(--t3);padding:10px 14px 0;display:block}
+
+    /* Real ad slot — paste Adsterra script here */
+    .real-ad-slot{padding:0 14px 14px;display:none}
+    /* Show this when you have the real script: .real-ad-slot{display:block} */
+
+    /* Simulated ad — remove when you have real script */
+    .sim-ad{margin:10px 14px 14px;border-radius:8px;overflow:hidden;background:#0a0a18;border:1px solid var(--border)}
+    .sim-ad-inner{position:relative}
+    .sim-ad-visual{height:90px;background:linear-gradient(135deg,#1a1a2e 0%,#0d1b2a 50%,#1a1a2e 100%);display:flex;align-items:center;justify-content:center;gap:14px;padding:16px}
+    .sim-ad-logo{width:40px;height:40px;border-radius:8px;background:var(--ac);display:flex;align-items:center;justify-content:center;font-size:20px;color:#080812;font-weight:900;flex-shrink:0}
+    .sim-ad-text{}
+    .sim-ad-brand{font-family:var(--fd);font-size:14px;font-weight:800;color:#fff;display:block}
+    .sim-ad-tagline{font-size:12px;color:rgba(255,255,255,.6);display:block}
+    .sim-ad-cta{display:inline-block;margin-top:6px;padding:4px 10px;background:var(--ac);color:#080812;border-radius:5px;font-size:11px;font-weight:700}
+    .sim-ad-timer{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.7);color:#fff;font-family:var(--fm);font-size:11px;padding:3px 7px;border-radius:4px}
+    .sim-ad-skip{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.7);color:#fff;font-family:var(--fm);font-size:11px;padding:3px 7px;border-radius:4px;cursor:pointer;display:none;border:1px solid rgba(255,255,255,.3);transition:background .15s}
+    .sim-ad-skip:hover{background:rgba(255,255,255,.15)}
+    .sim-ad-bar{height:2px;background:var(--border)}
+    .sim-ad-progress{height:100%;width:0%;background:var(--ac);transition:width .1s linear}
+    .sim-ad-footer{padding:6px 12px;display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,.3)}
+    .sim-ad-foot-label{font-family:var(--fm);font-size:9px;color:rgba(255,255,255,.4);letter-spacing:.08em}
+
+    /* Prompt input */
+    .prompt-wrap{width:100%;max-width:660px;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .15s,box-shadow .15s;margin-bottom:14px}
+    .prompt-wrap:focus-within{border-color:var(--border-hi);box-shadow:0 0 0 3px var(--ac-dim)}
+    .prompt-ta{width:100%;padding:18px 20px 10px;background:transparent;border:none;color:var(--t1);font-size:15px;line-height:1.65;resize:none;outline:none;min-height:100px;font-family:var(--fb)}
+    .prompt-ta::placeholder{color:var(--t3)}
+    .prompt-footer{display:flex;align-items:center;justify-content:space-between;padding:8px 14px 12px;border-top:1px solid var(--border)}
+    .char-count{font-family:var(--fm);font-size:11px;color:var(--t3)}
+    .prompt-actions{display:flex;align-items:center;gap:8px}
+    .clear-btn{padding:6px 12px;border-radius:8px;font-size:12px;color:var(--t3);transition:color .15s,background .15s}
+    .clear-btn:hover{color:var(--t2);background:var(--bg-hover)}
+    .gen-btn{display:flex;align-items:center;gap:8px;padding:10px 20px;background:var(--ac);color:#080812;border-radius:8px;font-family:var(--fd);font-size:13px;font-weight:700;letter-spacing:.03em;transition:transform .15s,box-shadow .15s,opacity .15s}
+    .gen-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 24px var(--ac-glow)}
+    .gen-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+
+    /* Chips */
+    .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:100%;max-width:660px}
+    .chip{padding:7px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:99px;font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;transition:all .15s;white-space:nowrap}
+    .chip:hover{border-color:var(--border-hi);background:var(--bg-hover);color:var(--t1)}
+
+    /* ── BUILD ZONE ─────────────────────────────── */
+    .build-zone{flex:1;display:none;flex-direction:column;overflow:hidden}
+    .build-toolbar{height:42px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:var(--bg-card);border-bottom:1px solid var(--border)}
+    .b-tabs{display:flex;gap:3px}
+    .b-tab{padding:5px 14px;border-radius:7px;font-size:13px;font-weight:500;color:var(--t2);transition:all .15s}
+    .b-tab:hover{background:var(--bg-hover);color:var(--t1)}
+    .b-tab.active{background:var(--bg-hover);color:var(--t1)}
+    .b-actions{display:flex;align-items:center;gap:7px}
+    .b-act{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:7px;font-size:12px;font-weight:500;color:var(--t2);border:1px solid var(--border);transition:all .15s}
+    .b-act:hover{color:var(--t1);background:var(--bg-hover);border-color:var(--border-hi)}
+    .b-act.primary{background:var(--ac);color:#080812;border-color:transparent}
+    .b-act.primary:hover{box-shadow:0 4px 16px var(--ac-glow);transform:translateY(-1px)}
+    .b-act.new{color:var(--t2)}
+
+    .split{flex:1;display:grid;grid-template-columns:1fr 1fr;overflow:hidden}
+
+    /* Code panel */
+    .code-panel{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+    .cp-header{display:flex;background:var(--bg-hover);border-bottom:1px solid var(--border);flex-shrink:0}
+    .cp-tab{padding:8px 14px;font-family:var(--fm);font-size:11px;color:var(--t3);border-right:1px solid var(--border);border-bottom:2px solid transparent;cursor:pointer;transition:all .15s}
+    .cp-tab:hover{color:var(--t2)}
+    .cp-tab.active{color:var(--ac);border-bottom-color:var(--ac);background:var(--bg-card)}
+    .cp-body{flex:1;overflow:auto;padding:14px 16px;font-family:var(--fm);font-size:12px;line-height:1.85;color:var(--t2);background:var(--bg);white-space:pre-wrap;word-break:break-word;scrollbar-width:thin;scrollbar-color:var(--border) transparent;position:relative}
+    .gen-indicator{position:sticky;bottom:0;left:0;padding:8px 0 2px;background:linear-gradient(to bottom,transparent,var(--bg) 50%);display:flex;align-items:center;gap:8px;font-family:var(--fm);font-size:11px;color:var(--ac)}
+    .gi-dot{width:5px;height:5px;background:var(--ac);border-radius:50%;animation:gidot 1s ease-in-out infinite}
+    @keyframes gidot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+
+    /* Preview panel */
+    .preview-panel{display:flex;flex-direction:column;overflow:hidden}
+    .pp-header{display:flex;align-items:center;gap:7px;padding:7px 12px;height:33px;background:var(--bg-hover);border-bottom:1px solid var(--border);flex-shrink:0}
+    .pp-dot{width:9px;height:9px;border-radius:50%}
+    .pp-dot.r{background:#ff5f57}.pp-dot.y{background:#ffbd2e}.pp-dot.g{background:#28ca41}
+    .pp-url{flex:1;text-align:center;font-family:var(--fm);font-size:10px;color:var(--t3)}
+    .pp-skeleton{flex:1;display:flex;flex-direction:column;gap:12px;padding:20px;background:var(--bg-card)}
+    .sk{background:linear-gradient(90deg,var(--bg-hover) 25%,var(--bg-card) 50%,var(--bg-hover) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .sk-h{height:24px;width:55%}.sk-b{height:13px}.sk-short{width:65%}.sk-big{height:180px;border-radius:10px}
+    .preview-frame{flex:1;border:none;display:none;background:#fff}
+
+    /* Share modal */
+    .share-modal{position:fixed;inset:0;z-index:500;background:rgba(8,8,18,.88);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;padding:20px}
+    .share-modal.open{display:flex}
+    .share-card{background:var(--bg-card);border:1px solid var(--border-hi);border-radius:18px;padding:34px 30px;max-width:340px;width:100%;text-align:center;animation:popIn .3s cubic-bezier(.34,1.56,.64,1) both}
+    @keyframes popIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:none}}
+    .share-title{font-family:var(--fd);font-size:19px;font-weight:800;margin-bottom:6px}
+    .share-sub{font-size:13px;color:var(--t2);margin-bottom:20px}
+    .share-btns{display:flex;flex-direction:column;gap:9px;margin-bottom:12px}
+    .sh-btn{display:flex;align-items:center;justify-content:center;padding:11px;border-radius:8px;font-size:13px;font-weight:600;transition:transform .15s}
+    .sh-btn:hover{transform:translateY(-2px);text-decoration:none}
+    .sh-x{background:#000;color:#fff}.sh-wa{background:#25d366;color:#fff}.sh-tg{background:#229ed9;color:#fff}
+    .share-close{font-size:13px;color:var(--t2);transition:color .15s}
+    .share-close:hover{color:var(--t1)}
+
+    /* Toasts */
+    .toast-wrap{position:fixed;bottom:18px;right:18px;z-index:900;display:flex;flex-direction:column;gap:7px;pointer-events:none}
+    .toast{display:flex;align-items:center;gap:9px;padding:11px 15px;background:var(--bg-card);border:1px solid var(--border-hi);border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,.4);font-size:13px;color:var(--t1);pointer-events:all;min-width:210px;max-width:290px;animation:tIn .22s cubic-bezier(.34,1.56,.64,1) both}
+    @keyframes tIn{from{opacity:0;transform:translateX(22px)}to{opacity:1;transform:none}}
+    .toast.out{animation:tOut .18s ease forwards}
+    @keyframes tOut{to{opacity:0;transform:translateX(22px)}}
+    .toast.success{border-left:2px solid var(--green)}.toast.error{border-left:2px solid var(--red)}.toast.info{border-left:2px solid var(--ac)}.toast.warn{border-left:2px solid var(--gold)}
+
+    /* Mobile */
+    @media(max-width:900px){
+      .sidebar{position:fixed;z-index:200;top:var(--nav-h);left:0;bottom:0;transform:translateX(-100%);box-shadow:0 0 40px rgba(0,0,0,.6)}
+      .sidebar.open{transform:translateX(0)}
+      .split{grid-template-columns:1fr}
+      .code-panel{display:none}
+      .code-panel.show{display:flex}
+      .preview-panel.hide{display:none}
+    }
+    @media(max-width:600px){
+      .prompt-zone{padding:20px 14px}
+      .pz-greeting{font-size:20px}
+      .chips{gap:6px}
+      .chip{font-size:12px;padding:6px 11px}
+      .nav-btn{display:none}
+      .b-actions{gap:4px}
+      .b-act span:not(.b-act-icon){display:none}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══ NAVBAR ══════════════════════════════════ -->
+  <nav class="nav">
+    <div class="nav-left">
+      <button class="sb-toggle" id="sbToggle" aria-label="Toggle sidebar">
+        <span></span><span></span><span></span>
+      </button>
+      <a href="index.html" class="brand">
+        <div class="brand-icon">✦</div>
+        <span class="brand-name">CLIX</span>
+      </a>
+      <div class="nav-sep"></div>
+      <div class="user-chip">
+        <div class="user-av" id="userAv">?</div>
+        <span id="userEmailDisplay" style="font-size:13px;color:var(--t2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="quota-badge" id="quotaBadge">
+        <span class="qd"></span>
+        <span id="quotaTxt">3 left today</span>
+      </div>
+      <a href="history.html" class="nav-btn">History</a>
+      <button class="nav-icon-btn" id="themeBtn" title="Toggle theme">🌙</button>
+      <button class="logout-btn" id="logoutBtn">Log out</button>
+    </div>
+  </nav>
+
+  <!-- ══ BODY ════════════════════════════════════ -->
+  <div class="body">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-inner">
+
+        <!-- Site type -->
+        <div class="sb-sec">
+          <span class="sb-label">Site type</span>
+          <div class="type-list" id="typeList">
+            <div class="type-item active" data-type="landing" data-label="Landing page"><span class="type-icon">🏠</span>Landing page</div>
+            <div class="type-item" data-type="portfolio" data-label="Portfolio"><span class="type-icon">🎨</span>Portfolio</div>
+            <div class="type-item" data-type="blog" data-label="Blog"><span class="type-icon">📝</span>Blog</div>
+            <div class="type-item" data-type="ecommerce" data-label="Store"><span class="type-icon">🛒</span>Store</div>
+            <div class="type-item" data-type="dashboard" data-label="Dashboard"><span class="type-icon">📊</span>Dashboard</div>
+            <div class="type-item" data-type="saas" data-label="SaaS / Startup"><span class="type-icon">🚀</span>SaaS / Startup</div>
+            <div class="type-item" data-type="restaurant" data-label="Restaurant"><span class="type-icon">🍽️</span>Restaurant</div>
+            <div class="type-item" data-type="custom" data-label="Custom"><span class="type-icon">⚡</span>Custom</div>
+          </div>
+        </div>
+
+        <div class="sb-divider"></div>
+
+        <!-- History -->
+        <div class="hist-sec">
+          <span class="sb-label">Build history</span>
+          <div class="hist-list" id="histList">
+            <div class="hist-empty" id="histEmpty">
+              <span style="font-size:22px;opacity:.3">🕒</span>
+              <span>No builds yet</span>
+              <span style="font-size:11px">Your history appears here</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sb-divider"></div>
+
+        <!-- ═══════════════════════════════════════
+             ADSTERRA SIDEBAR AD (300×250 or less)
+             ───────────────────────────────────────
+             To activate:
+             1. Get your ad code from Adsterra
+             2. Replace the placeholder div below
+                with your Adsterra script tag
+             3. The ad-box will display it
+        ════════════════════════════════════════ -->
+        <div class="sb-ad">
+          <div class="ad-box" id="sidebarAdSlot">
+
+            <!-- PASTE ADSTERRA SIDEBAR SCRIPT HERE -->
+            <!-- Example:
+            <script type="text/javascript">
+              atOptions = {'key':'YOUR_KEY','format':'iframe','height':250,'width':300,'params':{}}
+            </script>
+            <script type="text/javascript" src="//www.topcreativeformat.com/YOUR_KEY/invoke.js"></script>
+            -->
+
+            <!-- Remove this placeholder when you add the real script -->
+            <span class="ad-placeholder-label">ADVERTISEMENT</span>
+
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main">
+
+      <!-- PROMPT ZONE -->
+      <div class="prompt-zone" id="promptZone">
+        <h1 class="pz-greeting" id="pzGreeting">What are we building?</h1>
+        <p class="pz-sub">Describe your site in detail — the more specific, the better result</p>
+
+        <!-- Ad gate notice (shown while ad hasn't been watched) -->
+        <div class="ad-gate" id="adGate">
+          ⚡ Watch the short ad below to unlock your generation
+        </div>
+
+        <!-- ═══════════════════════════════════════════
+             AD ZONE — REWARDED AD
+             ───────────────────────────────────────────
+             CURRENTLY: Simulated ad (dev mode)
+             ───────────────────────────────────────────
+             TO SWITCH TO REAL ADSTERRA AD:
+             1. Delete the entire .sim-ad div
+             2. Set .real-ad-slot { display: block }
+             3. Paste your Adsterra script inside .real-ad-slot
+             4. In your Adsterra dashboard set the
+                completion callback to: window.onAdComplete()
+             5. The generate button unlocks automatically
+        ════════════════════════════════════════════ -->
+        <div class="ad-zone" id="adZone">
+          <span class="az-label">SPONSORED</span>
+
+          <!-- REAL AD SLOT (hidden until you have script) -->
+          <div class="real-ad-slot" id="realAdSlot">
+            <!-- PASTE YOUR ADSTERRA REWARDED/INTERSTITIAL SCRIPT HERE -->
+          </div>
+
+          <!-- SIMULATED AD (remove when real ad is ready) -->
+          <div class="sim-ad" id="simAd">
+            <div class="sim-ad-inner">
+              <div class="sim-ad-visual">
+                <div class="sim-ad-logo">✦</div>
+                <div class="sim-ad-text">
+                  <span class="sim-ad-brand">CLIX Pro</span>
+                  <span class="sim-ad-tagline">Unlimited builds. Priority AI.</span>
+                  <span class="sim-ad-cta">Learn more →</span>
+                </div>
+                <div class="sim-ad-timer" id="simTimer">5</div>
+                <button class="sim-ad-skip" id="simSkip">Skip Ad ›</button>
+              </div>
+              <div class="sim-ad-bar"><div class="sim-ad-progress" id="simProgress"></div></div>
+              <div class="sim-ad-footer">
+                <span class="sim-ad-foot-label">ADVERTISEMENT</span>
+                <span class="sim-ad-foot-label" id="simAdStatus">Watch to unlock</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prompt box -->
+        <div class="prompt-wrap" id="promptWrap">
+          <textarea class="prompt-ta" id="promptTa" placeholder="e.g. A dark minimal portfolio for a photographer named Zara — full-screen hero image, smooth scroll, minimal nav, contact form at the bottom..." maxlength="1000" rows="3"></textarea>
+          <div class="prompt-footer">
+            <span class="char-count" id="charCount">0 / 1000</span>
+            <div class="prompt-actions">
+              <button class="clear-btn" id="clearBtn">Clear</button>
+              <button class="gen-btn" id="genBtn" disabled>
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                Generate
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Suggestion chips (update when site type changes) -->
+        <div class="chips" id="chipsWrap"></div>
+
+      </div>
+
+      <!-- BUILD ZONE -->
+      <div class="build-zone" id="buildZone">
+        <div class="build-toolbar">
+          <div class="b-tabs">
+            <button class="b-tab active" id="bTabPreview">Preview</button>
+            <button class="b-tab" id="bTabCode">Code</button>
+          </div>
+          <div class="b-actions">
+            <button class="b-act" id="copyBtn">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy
+            </button>
+            <button class="b-act" id="shareBtn">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              Share
+            </button>
+            <button class="b-act new" id="newBtn">+ New build</button>
+            <button class="b-act primary" id="dlBtn">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download ZIP
+            </button>
+          </div>
+        </div>
+
+        <div class="split">
+          <!-- Code panel -->
+          <div class="code-panel" id="codePanel">
+            <div class="cp-header">
+              <button class="cp-tab active" data-file="full">full page</button>
+              <button class="cp-tab" data-file="html">HTML</button>
+              <button class="cp-tab" data-file="css">CSS</button>
+              <button class="cp-tab" data-file="js">JS</button>
+            </div>
+            <div class="cp-body" id="cpBody">
+              <div class="gen-indicator" id="genIndicator" style="display:none">
+                <span class="gi-dot"></span>AI is writing your code...
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview panel -->
+          <div class="preview-panel" id="previewPanel">
+            <div class="pp-header">
+              <span class="pp-dot r"></span><span class="pp-dot y"></span><span class="pp-dot g"></span>
+              <span class="pp-url" id="ppUrl">clix-preview</span>
+            </div>
+            <div class="pp-skeleton" id="ppSkeleton">
+              <div class="sk sk-h"></div>
+              <div class="sk sk-b"></div>
+              <div class="sk sk-b sk-short"></div>
+              <div class="sk sk-big"></div>
+            </div>
+            <iframe class="preview-frame" id="previewFrame" sandbox="allow-scripts allow-same-origin" title="Generated preview"></iframe>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Share modal -->
+  <div class="share-modal" id="shareModal">
+    <div class="share-card">
+      <h3 class="share-title">Share your build</h3>
+      <p class="share-sub">Show the world what you made with CLIX</p>
+      <div class="share-btns">
+        <a class="sh-btn sh-x"  id="shX"  href="#" target="_blank" rel="noopener">𝕏 Post on X</a>
+        <a class="sh-btn sh-wa" id="shWa" href="#" target="_blank" rel="noopener">WhatsApp</a>
+        <a class="sh-btn sh-tg" id="shTg" href="#" target="_blank" rel="noopener">Telegram</a>
+      </div>
+      <button class="share-close" id="shareClose">Close</button>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+    const sb = createClient(
+      'https://kikimirbzsnlcydzjdco.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtpa2ltaXJienNubGN5ZHpqZGNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDcxOTgsImV4cCI6MjA4OTc4MzE5OH0.Q8Qm2_v2-1OycwjLJRBNBgAFNSlP7i3ZJtiq1qrfdtI'
+    );
+
+    // ── Theme ─────────────────────────────────────
+    const html = document.documentElement;
+    const themeBtn = document.getElementById('themeBtn');
+    const applyTheme = t => { html.setAttribute('data-theme', t); localStorage.setItem('clix-theme', t); themeBtn.textContent = t === 'dark' ? '🌙' : '☀️'; };
+    applyTheme(localStorage.getItem('clix-theme') || 'dark');
+    themeBtn.addEventListener('click', () => applyTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+
+    // ── AUTH GUARD — redirect if not logged in ────
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session?.user) { window.location.href = 'signup.html'; }
+    const user = session.user;
+
+    // Keep session alive
+    sb.auth.onAuthStateChange((_e, s) => { if (!s) window.location.href = 'signup.html'; });
+
+    // ── User info ──────────────────────────────────
+    const name = user.user_metadata?.full_name || user.email || '';
+    const firstName = name.split(' ')[0];
+    document.getElementById('userAv').textContent = name.charAt(0).toUpperCase();
+    document.getElementById('userEmailDisplay').textContent = user.email || '';
+    if (firstName) document.getElementById('pzGreeting').textContent = `What are we building, ${firstName}?`;
+
+    // ── Logout ─────────────────────────────────────
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await sb.auth.signOut();
+      window.location.href = 'index.html';
+    });
+
+    // ── Sidebar toggle ─────────────────────────────
+    const sidebar = document.getElementById('sidebar');
+    const sbToggle = document.getElementById('sbToggle');
+    sbToggle.addEventListener('click', () => {
+      const open = sidebar.classList.toggle('open');
+      sbToggle.classList.toggle('open', open);
+    });
+    document.addEventListener('click', e => {
+      if (window.innerWidth > 900) return;
+      if (!sidebar.contains(e.target) && !sbToggle.contains(e.target)) {
+        sidebar.classList.remove('open');
+        sbToggle.classList.remove('open');
+      }
+    });
+
+    // ── State ──────────────────────────────────────
+    let selectedType = 'landing';
+    let adWatched = false;
+    let isGenerating = false;
+    let generatedHTML = '';
+    let extractedCSS = '';
+    let extractedJS = '';
+    let activeCodeFile = 'full';
+    let userQuota = 3;
+
+    // ── Quota ──────────────────────────────────────
+    async function loadQuota() {
+      try {
+        const { data } = await sb.from('profiles').select('daily_count,quota_reset_at').eq('id', user.id).single();
+        if (!data) return;
+        const isNew = new Date().toDateString() !== new Date(data.quota_reset_at || 0).toDateString();
+        if (isNew) {
+          await sb.from('profiles').update({ daily_count: 0, quota_reset_at: new Date().toISOString() }).eq('id', user.id);
+          userQuota = 3;
+        } else {
+          userQuota = Math.max(0, 3 - (data.daily_count || 0));
+        }
+        updateQuotaUI();
+      } catch(e) { console.warn(e); }
+    }
+    function updateQuotaUI() {
+      document.getElementById('quotaTxt').textContent = `${userQuota} left today`;
+      if (userQuota <= 0 && adWatched) {
+        document.getElementById('genBtn').disabled = true;
+        document.getElementById('genBtn').textContent = 'Limit reached';
+      }
+    }
+    await loadQuota();
+
+    // ── Site type ──────────────────────────────────
+    const CHIPS = {
+      landing:    ['📸 Photographer portfolio','🚀 SaaS landing page','💪 Gym website','☕ Coffee shop'],
+      portfolio:  ['🎨 Designer portfolio','👨‍💻 Developer portfolio','📷 Photography portfolio','✍️ Writer portfolio'],
+      blog:       ['📰 Tech blog','🍳 Food blog','✈️ Travel blog','💰 Finance blog'],
+      ecommerce:  ['⌚ Luxury product page','👟 Sneaker store','💄 Beauty store','📚 Book store'],
+      dashboard:  ['📊 Analytics dashboard','💹 Finance dashboard','📋 Project tracker','👥 Team dashboard'],
+      saas:       ['📧 Email tool landing','🤖 AI tool page','💳 Fintech startup','🔒 Security SaaS'],
+      restaurant: ['🍕 Italian restaurant','🍣 Sushi restaurant','🍔 Burger joint','🥗 Healthy café'],
+      custom:     ['🏠 Real estate listing','🎵 Music artist page','🏋️ Personal trainer','🖼️ Art gallery'],
+    };
+    function renderChips(type) {
+      const wrap = document.getElementById('chipsWrap');
+      const list = CHIPS[type] || CHIPS.custom;
+      wrap.innerHTML = list.map(c => `<button class="chip" data-prompt="${getChipPrompt(c, type)}">${c}</button>`).join('');
+    }
+    function getChipPrompt(chip, type) {
+      const prompts = {
+        '📸 Photographer portfolio': 'A dark minimal portfolio for a photographer named Zara. Full-screen hero image, smooth scroll between sections, minimal navigation, gallery grid, and a contact form at the bottom.',
+        '🚀 SaaS landing page': 'A modern SaaS landing page for an AI productivity tool called Focusly. Dark theme, bold headline, feature cards grid, pricing section with 3 tiers, testimonials, and a CTA button.',
+        '💪 Gym website': 'A gym and fitness website called IronCore. Dark energetic design, hero with a big headline, class schedule section, trainer profiles with photos, membership plans, and contact form.',
+        '☕ Coffee shop': 'A warm coffee shop website for a place called Brew & Co. Earthy brown tones, hero image, menu section with categories, about section, location map placeholder, and opening hours.',
+        '🎨 Designer portfolio': 'A clean portfolio for a UI/UX designer named Alex. Light theme, bold typography, projects grid, about section, skills list, and contact form.',
+        '👨‍💻 Developer portfolio': 'A dark developer portfolio. Hero with name and title, skills section, project cards with GitHub links, work experience timeline, and contact section.',
+        '📷 Photography portfolio': 'A full-screen photography portfolio. Dark background, masonry image grid, lightbox effect on click, minimal navigation, and social links footer.',
+        '✍️ Writer portfolio': 'A clean writer portfolio. Serif typography, featured articles, about section with bio, book covers, newsletter signup, and contact.',
+        '📰 Tech blog': 'A tech blog homepage. Dark theme, featured post hero, article cards grid, categories sidebar, newsletter section, and footer.',
+        '🍳 Food blog': 'A food blog with warm tones. Recipe cards with images, category filters, featured recipe hero, chef bio section, and newsletter signup.',
+        '✈️ Travel blog': 'A travel blog homepage. Full-width destination photos, trip cards, map section, about the traveller, Instagram feed placeholder, and subscribe form.',
+        '💰 Finance blog': 'A clean finance blog. Professional blue theme, article cards, market data placeholder section, newsletter signup, and about section.',
+        '⌚ Luxury product page': 'A luxury watch product page for a brand called Tempus. Dark background, large product image carousel, product details, material specs, add to cart button, and customer reviews.',
+        '👟 Sneaker store': 'A sneaker e-commerce page. Bold colours, product grid, filter sidebar, featured drop hero, cart button, and size selector.',
+        '💄 Beauty store': 'A beauty and skincare store. Clean white design, product grid with ratings, featured collection hero, ingredients section, and checkout button.',
+        '📚 Book store': 'An online bookstore. Bestsellers grid, genre categories, featured author section, reading list feature, and newsletter.',
+        '📊 Analytics dashboard': 'A web analytics dashboard. Dark theme, sidebar navigation, KPI cards at top, line chart for traffic, bar chart for sources, recent pages table.',
+        '💹 Finance dashboard': 'A finance dashboard. Dark professional theme, portfolio overview cards, stock chart, recent transactions table, quick actions sidebar.',
+        '📋 Project tracker': 'A project management dashboard. Kanban board layout, task cards with status, team member avatars, progress bars, and deadline indicators.',
+        '👥 Team dashboard': 'A team management dashboard. Member cards grid, activity feed, task assignments, calendar widget, and stats overview.',
+        '📧 Email tool landing': 'A landing page for an email marketing tool called Mailcraft. Clean design, headline, feature icons, pricing table, customer logos, and signup form.',
+        '🤖 AI tool page': 'A landing page for an AI writing assistant called WriteAI. Dark modern design, animated hero, feature showcase, demo section, pricing, and CTA.',
+        '💳 Fintech startup': 'A fintech startup landing page for an app called Payd. Clean white design, bold hero, 3 feature cards, how it works steps, testimonials, and app download buttons.',
+        '🔒 Security SaaS': 'A cybersecurity SaaS landing page. Dark professional theme, threat stats counter, feature grid, compliance badges, pricing tiers, and enterprise contact form.',
+        '🍕 Italian restaurant': 'An Italian restaurant website called Bella Roma. Warm reds and creams, hero with food photo, menu with categories, reservation form, gallery, and location.',
+        '🍣 Sushi restaurant': 'A sushi restaurant website called Sakura. Minimalist Japanese design, white and black, menu sections, chef profile, reservation booking, and opening times.',
+        '🍔 Burger joint': 'A burger restaurant website called Stack House. Bold dark design, menu with images and prices, order online button, about section, and location map.',
+        '🥗 Healthy café': 'A healthy café website called Green Bowl. Fresh green tones, menu with nutritional info, daily specials, loyalty program section, and contact.',
+        '🏠 Real estate listing': 'A real estate property listing page. Clean professional design, property photos carousel, price and details, features list, agent contact, and map.',
+        '🎵 Music artist page': 'A music artist website. Dark atmospheric design, hero with artist photo, latest album section, upcoming shows list, music player placeholder, and social links.',
+        '🏋️ Personal trainer': 'A personal trainer website. Bold energetic design, services section, transformation photos, client testimonials, pricing packages, and booking form.',
+        '🖼️ Art gallery': 'An art gallery website. Minimal white design, artwork grid with titles, exhibition schedule, artist spotlight, about the gallery, and visit info.',
+      };
+      return prompts[chip] || `A ${type} website: ${chip.replace(/^[^\s]+\s/, '')}`;
+    }
+    renderChips('landing');
+
+    document.getElementById('chipsWrap').addEventListener('click', e => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      document.getElementById('promptTa').value = chip.dataset.prompt;
+      document.getElementById('charCount').textContent = `${chip.dataset.prompt.length} / 1000`;
+      document.getElementById('promptTa').focus();
+    });
+
+    // Site type selection
+    document.getElementById('typeList').addEventListener('click', e => {
+      const item = e.target.closest('.type-item');
+      if (!item) return;
+      document.querySelectorAll('.type-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+      selectedType = item.dataset.type;
+      renderChips(selectedType);
+      // Close sidebar on mobile after selection
+      if (window.innerWidth <= 900) {
+        sidebar.classList.remove('open');
+        sbToggle.classList.remove('open');
+      }
+    });
+
+    // ── Prompt ─────────────────────────────────────
+    const promptTa = document.getElementById('promptTa');
+    const charCount = document.getElementById('charCount');
+    promptTa.addEventListener('input', () => { charCount.textContent = `${promptTa.value.length} / 1000`; });
+    document.getElementById('clearBtn').addEventListener('click', () => { promptTa.value = ''; charCount.textContent = '0 / 1000'; promptTa.focus(); });
+
+    // ── Load history ───────────────────────────────
+    async function loadHistory() {
+      const { data } = await sb.from('generations').select('id,title,site_type,created_at,html_output').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20);
+      const list = document.getElementById('histList');
+      const empty = document.getElementById('histEmpty');
+      if (!data?.length) { empty.style.display = 'flex'; return; }
+      empty.style.display = 'none';
+      list.querySelectorAll('.hist-item').forEach(el => el.remove());
+      data.forEach(item => {
+        const el = document.createElement('div');
+        el.className = 'hist-item';
+        el.innerHTML = `<div class="hist-title">${esc(item.title || 'Untitled')}</div><div class="hist-meta"><span>${item.site_type||'custom'}</span><span>${timeAgo(item.created_at)}</span></div>`;
+        el.addEventListener('click', () => {
+          generatedHTML = item.html_output || '';
+          extractedCSS = ''; extractedJS = '';
+          showBuildZone();
+          renderPreview();
+          renderCode('full');
+          document.getElementById('genIndicator').style.display = 'none';
+          toast('Build loaded from history', 'info');
+          if (window.innerWidth <= 900) { sidebar.classList.remove('open'); sbToggle.classList.remove('open'); }
+        });
+        list.insertBefore(el, empty);
+      });
+    }
+    await loadHistory();
+
+    // ── Simulated ad ───────────────────────────────
+    // This runs automatically when the page loads.
+    // When you get your real Adsterra script:
+    // 1. Remove the runSimAd() call
+    // 2. Remove the simAd div in HTML
+    // 3. Show .real-ad-slot
+    // 4. Paste Adsterra script inside .real-ad-slot
+    // 5. Set Adsterra callback to window.onAdComplete()
+
+    function runSimAd() {
+      const timer = document.getElementById('simTimer');
+      const skip = document.getElementById('simSkip');
+      const progress = document.getElementById('simProgress');
+      const status = document.getElementById('simAdStatus');
+      let secs = 5;
+      timer.textContent = secs;
+      progress.style.width = '0%';
+
+      const interval = setInterval(() => {
+        secs--;
+        timer.textContent = secs;
+        progress.style.width = `${((5 - secs) / 5) * 100}%`;
+        if (secs <= 2) {
+          timer.style.display = 'none';
+          skip.style.display = 'block';
+          status.textContent = 'You can skip';
+        }
+        if (secs <= 0) {
+          clearInterval(interval);
+          progress.style.width = '100%';
+          skip.style.display = 'none';
+          status.textContent = 'Ad complete';
+          setTimeout(() => window.onAdComplete(), 300);
+        }
+      }, 1000);
+
+      skip.addEventListener('click', () => {
+        clearInterval(interval);
+        progress.style.width = '100%';
+        skip.style.display = 'none';
+        status.textContent = 'Ad complete';
+        setTimeout(() => window.onAdComplete(), 200);
+      }, { once: true });
+    }
+
+    // ── onAdComplete — called by sim ad or real Adsterra ─
+    window.onAdComplete = function() {
+      adWatched = true;
+      document.getElementById('adGate').style.display = 'none';
+      document.getElementById('adZone').style.display = 'none';
+      if (userQuota > 0) {
+        document.getElementById('genBtn').disabled = false;
+      }
+      toast('Ad complete — generate your site!', 'success');
+    };
+
+    // Start the simulated ad
+    runSimAd();
+
+    // ── Generate ────────────────────────────────────
+    document.getElementById('genBtn').addEventListener('click', async () => {
+      if (isGenerating) return;
+      if (!adWatched) { toast('Please watch the ad first.', 'warn'); return; }
+      if (userQuota <= 0) { toast('Daily limit reached. Come back tomorrow!', 'warn'); return; }
+      const prompt = promptTa.value.trim();
+      if (!prompt) { toast('Describe what you want to build first.', 'warn'); promptTa.focus(); return; }
+      await generate(prompt);
+    });
+
+    async function generate(prompt) {
+      isGenerating = true;
+      adWatched = false;
+
+      showBuildZone();
+      generatedHTML = ''; extractedCSS = ''; extractedJS = '';
+
+      // Reset UI
+      const cpBody = document.getElementById('cpBody');
+      cpBody.textContent = '';
+      document.getElementById('genIndicator').style.display = 'flex';
+      cpBody.appendChild(document.getElementById('genIndicator'));
+      document.getElementById('ppSkeleton').style.display = 'flex';
+      document.getElementById('previewFrame').style.display = 'none';
+
+      try {
+        const s = (await sb.auth.getSession()).data.session;
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt, siteType: selectedType, userToken: s?.access_token })
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.message || 'Generation failed');
+        }
+
+        // Stream the response
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let rawResponse = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          rawResponse += chunk;
+
+          // Stream into code panel
+          cpBody.textContent = rawResponse;
+          cpBody.appendChild(document.getElementById('genIndicator'));
+          cpBody.scrollTop = cpBody.scrollHeight;
+
+          // Try to update preview with partial HTML
+          const partial = tryExtractHTML(rawResponse);
+          if (partial && partial.length > 200) {
+            document.getElementById('ppSkeleton').style.display = 'none';
+            document.getElementById('previewFrame').style.display = 'block';
+            document.getElementById('previewFrame').srcdoc = partial;
+          }
+        }
+
+        // Parse final response
+        const parsed = parseResponse(rawResponse);
+        generatedHTML = parsed.html || rawResponse;
+        extractedCSS  = parsed.css  || extractCSS(generatedHTML);
+        extractedJS   = parsed.js   || extractJS(generatedHTML);
+
+        // Show final result
+        document.getElementById('genIndicator').style.display = 'none';
+        renderCode(activeCodeFile);
+        document.getElementById('ppSkeleton').style.display = 'none';
+        document.getElementById('previewFrame').style.display = 'block';
+        renderPreview();
+
+        // Update quota
+        try {
+          const { data: pd } = await sb.from('profiles').select('daily_count').eq('id', user.id).single();
+          await sb.from('profiles').update({ daily_count: (pd?.daily_count || 0) + 1 }).eq('id', user.id);
+          userQuota = Math.max(0, userQuota - 1);
+          updateQuotaUI();
+        } catch(e) {}
+
+        // Update global counter
+        try {
+          const { data: gd } = await sb.from('global_stats').select('daily_count').eq('id', 1).single();
+          await sb.from('global_stats').update({ daily_count: (gd?.daily_count || 0) + 1 }).eq('id', 1);
+        } catch(e) {}
+
+        // Save to history
+        await sb.from('generations').insert({
+          user_id: user.id, prompt,
+          title: prompt.slice(0, 50) + (prompt.length > 50 ? '...' : ''),
+          site_type: selectedType,
+          html_output: generatedHTML,
+          css_output: extractedCSS,
+          js_output: extractedJS,
+        });
+        await loadHistory();
+
+        // Reset ad gate for next generation
+        document.getElementById('adGate').style.display = 'flex';
+        document.getElementById('adZone').style.display = '';
+        document.getElementById('genBtn').disabled = true;
+        runSimAd();
+
+        toast('Your site is ready! 🎉', 'success');
+
+      } catch(err) {
+        document.getElementById('genIndicator').style.display = 'none';
+        toast(err.message || 'Something went wrong. Try again.', 'error');
+        showPromptZone();
+        adWatched = false;
+        runSimAd();
+      }
+
+      isGenerating = false;
+    }
+
+    // ── Parse AI response ──────────────────────────
+    function parseResponse(raw) {
+      // Try JSON first
+      try {
+        let clean = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+        const start = clean.indexOf('{'), end = clean.lastIndexOf('}');
+        if (start !== -1 && end !== -1) {
+          const p = JSON.parse(clean.slice(start, end + 1));
+          if (p.html) return p;
+        }
+      } catch(e) {}
+      // If not JSON, treat entire response as full HTML
+      return { html: raw, css: '', js: '' };
+    }
+
+    function tryExtractHTML(raw) {
+      try {
+        const p = parseResponse(raw);
+        if (p.html && p.html.includes('<')) return p.html;
+      } catch(e) {}
+      if (raw.includes('<!DOCTYPE') || raw.includes('<html')) return raw;
+      return null;
+    }
+
+    function extractCSS(html) {
+      const match = html.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
+      return match ? match[1] : '';
+    }
+    function extractJS(html) {
+      const match = html.match(/<script[^>]*>([\s\S]*?)<\/script>/i);
+      return match ? match[1] : '';
+    }
+
+    // ── Zone switching ─────────────────────────────
+    function showBuildZone() {
+      document.getElementById('promptZone').style.display = 'none';
+      document.getElementById('buildZone').style.display = 'flex';
+    }
+    function showPromptZone() {
+      document.getElementById('buildZone').style.display = 'none';
+      document.getElementById('promptZone').style.display = 'flex';
+    }
+
+    document.getElementById('newBtn').addEventListener('click', () => {
+      showPromptZone();
+      document.getElementById('adGate').style.display = 'flex';
+      document.getElementById('adZone').style.display = '';
+      document.getElementById('genBtn').disabled = true;
+      runSimAd();
+    });
+
+    // ── Code rendering ─────────────────────────────
+    document.querySelectorAll('.cp-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.cp-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        activeCodeFile = tab.dataset.file;
+        renderCode(activeCodeFile);
+      });
+    });
+
+    function renderCode(file) {
+      const map = { full: generatedHTML, html: stripTagContent(generatedHTML, 'style,script'), css: extractedCSS, js: extractedJS };
+      document.getElementById('cpBody').textContent = map[file] || generatedHTML || '';
+    }
+
+    function stripTagContent(html, tags) {
+      let result = html;
+      tags.split(',').forEach(tag => {
+        result = result.replace(new RegExp(`<${tag}[^>]*>[\\s\\S]*?<\\/${tag}>`, 'gi'), '');
+      });
+      return result.trim();
+    }
+
+    // ── Preview ────────────────────────────────────
+    function renderPreview() {
+      const frame = document.getElementById('previewFrame');
+      frame.style.display = 'block';
+      document.getElementById('ppSkeleton').style.display = 'none';
+      // Use the full HTML as generated — CSS and JS are embedded inside
+      frame.srcdoc = generatedHTML.includes('<html') || generatedHTML.includes('<!DOCTYPE')
+        ? generatedHTML
+        : `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>${generatedHTML}</body></html>`;
+    }
+
+    // ── Preview/Code tab toggle ────────────────────
+    document.getElementById('bTabPreview').addEventListener('click', () => {
+      document.getElementById('bTabPreview').classList.add('active');
+      document.getElementById('bTabCode').classList.remove('active');
+      document.getElementById('previewPanel').classList.remove('hide');
+      document.getElementById('codePanel').classList.remove('show');
+    });
+    document.getElementById('bTabCode').addEventListener('click', () => {
+      document.getElementById('bTabCode').classList.add('active');
+      document.getElementById('bTabPreview').classList.remove('active');
+      document.getElementById('codePanel').classList.add('show');
+      document.getElementById('previewPanel').classList.add('hide');
+    });
+
+    // ── Copy ───────────────────────────────────────
+    document.getElementById('copyBtn').addEventListener('click', async () => {
+      const text = ({ full: generatedHTML, html: stripTagContent(generatedHTML,'style,script'), css: extractedCSS, js: extractedJS })[activeCodeFile] || generatedHTML;
+      try { await navigator.clipboard.writeText(text); toast('Copied!', 'success'); }
+      catch { toast('Copy failed', 'error'); }
+    });
+
+    // ── Download ZIP ───────────────────────────────
+    document.getElementById('dlBtn').addEventListener('click', async () => {
+      if (!generatedHTML) { toast('Nothing to download yet', 'warn'); return; }
+      try {
+        const zip = new JSZip();
+        zip.file('index.html', generatedHTML);
+        zip.file('README.md', '# Built with CLIX ✦\nhttps://clix.app\n');
+        const blob = await zip.generateAsync({ type: 'blob' });
+        const url = URL.createObjectURL(blob);
+        Object.assign(document.createElement('a'), { href: url, download: 'clix-site.zip' }).click();
+        URL.revokeObjectURL(url);
+        toast('ZIP downloaded!', 'success');
+      } catch { toast('Download failed', 'error'); }
+    });
+
+    // ── Share ──────────────────────────────────────
+    document.getElementById('shareBtn').addEventListener('click', () => {
+      const t = encodeURIComponent('I just built a website in seconds with CLIX — free AI website builder! 🚀 https://clix.app');
+      document.getElementById('shX').href  = `https://twitter.com/intent/tweet?text=${t}`;
+      document.getElementById('shWa').href = `https://wa.me/?text=${t}`;
+      document.getElementById('shTg').href = `https://t.me/share/url?url=https://clix.app&text=${encodeURIComponent('Built a site with CLIX 🚀')}`;
+      document.getElementById('shareModal').classList.add('open');
+    });
+    document.getElementById('shareClose').addEventListener('click', () => document.getElementById('shareModal').classList.remove('open'));
+
+    // ── Toast ──────────────────────────────────────
+    function toast(msg, type = 'info') {
+      const icons = { success: '✓', error: '✕', info: '◈', warn: '⚡' };
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.innerHTML = `<span>${icons[type]}</span><span>${esc(msg)}</span>`;
+      document.getElementById('toastWrap').appendChild(el);
+      setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 200); }, 3500);
+    }
+
+    // ── Utils ──────────────────────────────────────
+    const esc = s => { const d = document.createElement('div'); d.appendChild(document.createTextNode(String(s||''))); return d.innerHTML; };
+    const timeAgo = iso => {
+      if (!iso) return '';
+      const d = Date.now() - new Date(iso);
+      if (d < 60000) return 'just now';
+      if (d < 3600000) return `${Math.floor(d/60000)}m ago`;
+      if (d < 86400000) return `${Math.floor(d/3600000)}h ago`;
+      return new Date(iso).toLocaleDateString();
+    };
+  </script>
+</body>
+</html>
