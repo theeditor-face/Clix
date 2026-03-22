@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account — CLIX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23080812'/><text y='.9em' x='.1em' font-size='80'>✦</text></svg>" />
+  <style>
+    :root {
+      --bg:         #080812;
+      --bg-card:    #0d0d1a;
+      --bg-input:   #0a0a16;
+      --bg-hover:   #111122;
+      --border:     rgba(255,255,255,0.07);
+      --border-hi:  rgba(46,185,223,0.22);
+      --text-1:     #e8e8f0;
+      --text-2:     #7878a0;
+      --text-3:     #3a3a58;
+      --accent:     #2eb9df;
+      --accent-dim: rgba(46,185,223,0.09);
+      --accent-glow:rgba(46,185,223,0.28);
+      --red:        #f7516a;
+      --red-dim:    rgba(247,81,106,0.10);
+      --green:      #1de9b0;
+      --f-display:  'Bricolage Grotesque', sans-serif;
+      --f-body:     'Inter', sans-serif;
+      --f-mono:     'JetBrains Mono', monospace;
+      --r:          12px;
+      --r-sm:       8px;
+    }
+    [data-theme="light"] {
+      --bg:         #f5f5fb;
+      --bg-card:    #ffffff;
+      --bg-input:   #f0f0fa;
+      --bg-hover:   #ebebf5;
+      --border:     rgba(0,0,0,0.08);
+      --border-hi:  rgba(46,130,200,0.22);
+      --text-1:     #09090f;
+      --text-2:     #50507a;
+      --text-3:     #9898b8;
+      --accent:     #1a7fc4;
+      --accent-dim: rgba(26,127,196,0.08);
+      --accent-glow:rgba(26,127,196,0.20);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
+    body {
+      font-family: var(--f-body);
+      background: var(--bg);
+      color: var(--text-1);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background .3s, color .3s;
+    }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; font-family: var(--f-body); background: none; border: none; color: inherit; }
+    ::selection { background: var(--accent-dim); color: var(--accent); }
+
+    /* BG */
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 68px 68px;
+    }
+    [data-theme="light"] .bg-grid {
+      background-image:
+        linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+    }
+    .bg-glow {
+      position: fixed; pointer-events: none; z-index: 0;
+      top: -200px; left: 50%; transform: translateX(-50%);
+      width: 700px; height: 500px;
+      background: radial-gradient(ellipse, rgba(46,185,223,0.07) 0%, transparent 65%);
+    }
+
+    /* NAV */
+    .nav {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 44px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-mark {
+      width: 34px; height: 34px;
+      background: var(--accent); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; color: var(--bg); font-weight: 900;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+    .brand-name {
+      font-family: var(--f-display);
+      font-size: 20px; font-weight: 800; letter-spacing: .06em;
+    }
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+    .nav-link {
+      font-size: 14px; font-weight: 500; color: var(--text-2);
+      padding: 7px 14px; border-radius: var(--r-sm);
+      transition: color .15s, background .15s;
+    }
+    .nav-link:hover { color: var(--text-1); background: var(--bg-hover); }
+    .theme-btn {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--bg-hover); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; color: var(--text-2);
+      transition: color .15s, transform .2s;
+    }
+    .theme-btn:hover { color: var(--text-1); transform: rotate(20deg); }
+    .icon-sun { display: none; }
+    [data-theme="light"] .icon-moon { display: none; }
+    [data-theme="light"] .icon-sun  { display: block; }
+
+    /* MAIN */
+    .main {
+      position: relative; z-index: 1;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px 80px;
+    }
+
+    .auth-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+      max-width: 960px;
+      width: 100%;
+    }
+
+    /* Left: branding */
+    .auth-left {}
+    .auth-welcome {
+      font-family: var(--f-display);
+      font-size: clamp(32px, 4vw, 52px);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -.02em;
+      color: var(--text-1);
+      margin-bottom: 18px;
+    }
+    .auth-welcome .hl { color: var(--accent); }
+    .auth-tagline {
+      font-size: 16px; line-height: 1.7; color: var(--text-2);
+      margin-bottom: 36px;
+    }
+    .auth-perks { display: flex; flex-direction: column; gap: 14px; }
+    .perk {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 14px; color: var(--text-2);
+    }
+    .perk-icon {
+      width: 32px; height: 32px;
+      background: var(--accent-dim);
+      border: 1px solid var(--border-hi);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; flex-shrink: 0;
+    }
+    .perk strong { color: var(--text-1); }
+
+    /* Right: form card */
+    .auth-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px 36px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+      position: relative;
+      overflow: hidden;
+    }
+    .auth-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2, #7c6af7));
+    }
+
+    .card-title {
+      font-family: var(--f-display);
+      font-size: 24px; font-weight: 800;
+      color: var(--text-1); margin-bottom: 6px;
+    }
+    .card-sub {
+      font-size: 14px; color: var(--text-2); margin-bottom: 28px;
+    }
+
+    /* Form */
+    .form { display: flex; flex-direction: column; gap: 18px; }
+
+    .field-group { display: flex; flex-direction: column; gap: 6px; }
+    .field-label {
+      font-size: 13px; font-weight: 600; color: var(--text-2);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .field-label span { color: var(--red); }
+
+    .field-wrap { position: relative; }
+    .field-icon {
+      position: absolute; left: 14px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-3); pointer-events: none;
+      display: flex; align-items: center;
+    }
+    .field {
+      width: 100%;
+      padding: 13px 14px 13px 42px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      color: var(--text-1);
+      font-size: 15px;
+      font-family: var(--f-body);
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .field::placeholder { color: var(--text-3); }
+    .field:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+    .field.error { border-color: var(--red); box-shadow: 0 0 0 3px var(--red-dim); }
+
+    /* Password toggle */
+    .pw-toggle {
+      position: absolute; right: 14px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-3); font-size: 18px;
+      background: none; border: none; cursor: pointer;
+      padding: 4px; line-height: 1;
+      transition: color .15s;
+    }
+    .pw-toggle:hover { color: var(--text-2); }
+    .field-hint {
+      font-size: 12px; color: var(--text-3); margin-top: 4px;
+    }
+
+    /* Password strength */
+    .pw-strength { display: flex; gap: 4px; margin-top: 6px; }
+    .pw-bar {
+      flex: 1; height: 3px;
+      background: var(--border);
+      border-radius: 99px;
+      transition: background .2s;
+    }
+    .pw-bar.weak   { background: var(--red); }
+    .pw-bar.medium { background: var(--gold, #f5c842); }
+    .pw-bar.strong { background: var(--green); }
+    .pw-strength-label {
+      font-size: 11px; color: var(--text-3); margin-top: 4px;
+    }
+
+    /* Terms */
+    .terms-row {
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .terms-chk { width: 15px; height: 15px; accent-color: var(--accent); margin-top: 2px; flex-shrink: 0; cursor: pointer; }
+    .terms-lbl { font-size: 13px; color: var(--text-2); line-height: 1.5; }
+    .terms-lbl a { color: var(--accent); }
+
+    /* Submit btn */
+    .btn-submit {
+      width: 100%;
+      padding: 15px;
+      background: var(--accent);
+      color: var(--bg);
+      border-radius: var(--r-sm);
+      font-family: var(--f-display);
+      font-size: 15px; font-weight: 700;
+      letter-spacing: .03em;
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      transition: transform .15s, box-shadow .15s, opacity .15s;
+      position: relative; overflow: hidden;
+    }
+    .btn-submit::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.18), transparent);
+      opacity: 0; transition: opacity .15s;
+    }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 12px 36px var(--accent-glow); }
+    .btn-submit:hover::after { opacity: 1; }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* Spinner */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(8,8,18,0.3);
+      border-top-color: var(--bg);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Error message */
+    .form-err {
+      display: none;
+      padding: 12px 14px;
+      background: var(--red-dim);
+      border: 1px solid rgba(247,81,106,0.22);
+      border-radius: var(--r-sm);
+      font-size: 13px; color: var(--red);
+      line-height: 1.5;
+    }
+    .form-err.visible { display: block; }
+
+    /* Switch */
+    .auth-switch {
+      text-align: center;
+      font-size: 14px; color: var(--text-2);
+      margin-top: 20px;
+    }
+    .auth-switch a { color: var(--accent); font-weight: 600; }
+
+    /* Divider */
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      color: var(--text-3); font-size: 12px;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .auth-container { grid-template-columns: 1fr; gap: 32px; }
+      .auth-left { display: none; }
+      .nav { padding: 16px 20px; }
+    }
+    @media (max-width: 480px) {
+      .auth-card { padding: 28px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <a href="index.html" class="brand">
+      <div class="brand-mark">✦</div>
+      <span class="brand-name">CLIX</span>
+    </a>
+    <div class="nav-right">
+      <button class="theme-btn" id="themeToggle">
+        <span class="icon-moon">🌙</span>
+        <span class="icon-sun">☀️</span>
+      </button>
+      <a href="signup.html" class="nav-link">Already have an account? <strong>Sign in</strong></a>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="auth-container">
+
+      <!-- Left branding -->
+      <div class="auth-left">
+        <h1 class="auth-welcome">
+          The fastest way to<br /><span class="hl">build a website.</span>
+        </h1>
+        <p class="auth-tagline">
+          Create your free account and start generating production-ready websites in seconds. No credit card needed.
+        </p>
+        <div class="auth-perks">
+          <div class="perk">
+            <div class="perk-icon">⚡</div>
+            <div><strong>3 free builds every day</strong> — resets at midnight</div>
+          </div>
+          <div class="perk">
+            <div class="perk-icon">📦</div>
+            <div><strong>Download as ZIP</strong> — clean HTML, CSS and JS files</div>
+          </div>
+          <div class="perk">
+            <div class="perk-icon">🕒</div>
+            <div><strong>Build history saved</strong> — all your creations, always accessible</div>
+          </div>
+          <div class="perk">
+            <div class="perk-icon">🔒</div>
+            <div><strong>Secure by default</strong> — verified email, no spam</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right form -->
+      <div class="auth-card">
+        <h2 class="card-title">Create your account</h2>
+        <p class="card-sub">Get started in under a minute.</p>
+
+        <form class="form" id="signupForm" novalidate>
+
+          <!-- Full name -->
+          <div class="field-group">
+            <label class="field-label" for="nameInput">
+              Full name <span>*</span>
+            </label>
+            <div class="field-wrap">
+              <span class="field-icon">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </span>
+              <input type="text" class="field" id="nameInput" placeholder="Your full name" autocomplete="name" />
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="field-group">
+            <label class="field-label" for="emailInput">
+              Email address <span>*</span>
+            </label>
+            <div class="field-wrap">
+              <span class="field-icon">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+              </span>
+              <input type="email" class="field" id="emailInput" placeholder="you@example.com" autocomplete="email" />
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="field-group">
+            <label class="field-label" for="passwordInput">
+              Password <span>*</span>
+            </label>
+            <div class="field-wrap">
+              <span class="field-icon">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </span>
+              <input type="password" class="field" id="passwordInput" placeholder="Create a strong password" autocomplete="new-password" />
+              <button type="button" class="pw-toggle" id="pwToggle">👁</button>
+            </div>
+            <div class="pw-strength" id="pwStrength">
+              <div class="pw-bar" id="bar1"></div>
+              <div class="pw-bar" id="bar2"></div>
+              <div class="pw-bar" id="bar3"></div>
+              <div class="pw-bar" id="bar4"></div>
+            </div>
+            <p class="pw-strength-label" id="pwLabel">Minimum 8 characters</p>
+          </div>
+
+          <!-- Terms -->
+          <div class="terms-row">
+            <input type="checkbox" class="terms-chk" id="termsChk" />
+            <label class="terms-lbl" for="termsChk">
+              I agree to the <a href="#">Terms of Use</a> and <a href="#">Privacy Policy</a>
+            </label>
+          </div>
+
+          <!-- Error -->
+          <div class="form-err" id="formErr"></div>
+
+          <!-- Submit -->
+          <button type="submit" class="btn-submit" id="submitBtn">
+            <div class="spinner" id="spinner"></div>
+            <span id="submitText">Create account</span>
+            <svg id="submitArrow" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+
+        </form>
+
+        <p class="auth-switch">Already have an account? <a href="signup.html" id="signinLink">Sign in instead</a></p>
+      </div>
+
+    </div>
+  </main>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    const supabase = createClient(
+      'https://kikimirbzsnlcydzjdco.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtpa2ltaXJienNubGN5ZHpqZGNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDcxOTgsImV4cCI6MjA4OTc4MzE5OH0.Q8Qm2_v2-1OycwjLJRBNBgAFNSlP7i3ZJtiq1qrfdtI'
+    );
+
+    // ── Theme ──────────────────────────────────────
+    const html = document.documentElement;
+    const themeBtn = document.getElementById('themeToggle');
+    function applyTheme(t) {
+      html.setAttribute('data-theme', t);
+      localStorage.setItem('clix-theme', t);
+    }
+    applyTheme(localStorage.getItem('clix-theme') || 'dark');
+    themeBtn.addEventListener('click', () => {
+      applyTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    });
+
+    // ── Redirect if already logged in ─────────────
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) window.location.href = 'builder.html';
+
+    // ── Password strength ──────────────────────────
+    const pwInput  = document.getElementById('passwordInput');
+    const bars     = [document.getElementById('bar1'), document.getElementById('bar2'), document.getElementById('bar3'), document.getElementById('bar4')];
+    const pwLabel  = document.getElementById('pwLabel');
+
+    pwInput.addEventListener('input', () => {
+      const v = pwInput.value;
+      let score = 0;
+      if (v.length >= 8)  score++;
+      if (v.length >= 12) score++;
+      if (/[A-Z]/.test(v) && /[0-9]/.test(v)) score++;
+      if (/[^A-Za-z0-9]/.test(v)) score++;
+
+      bars.forEach((b, i) => {
+        b.className = 'pw-bar';
+        if (i < score) {
+          if (score <= 1) b.classList.add('weak');
+          else if (score <= 2) b.classList.add('medium');
+          else b.classList.add('strong');
+        }
+      });
+
+      const labels = ['', 'Weak — add more characters', 'Fair — add numbers and capitals', 'Good password', 'Strong password'];
+      pwLabel.textContent = v.length === 0 ? 'Minimum 8 characters' : (labels[score] || 'Strong password');
+    });
+
+    // ── Password toggle ────────────────────────────
+    document.getElementById('pwToggle').addEventListener('click', () => {
+      pwInput.type = pwInput.type === 'password' ? 'text' : 'password';
+    });
+
+    // ── Form submit ────────────────────────────────
+    const form      = document.getElementById('signupForm');
+    const nameInput = document.getElementById('nameInput');
+    const emailInput= document.getElementById('emailInput');
+    const termsChk  = document.getElementById('termsChk');
+    const submitBtn = document.getElementById('submitBtn');
+    const spinner   = document.getElementById('spinner');
+    const submitText= document.getElementById('submitText');
+    const submitArrow=document.getElementById('submitArrow');
+    const formErr   = document.getElementById('formErr');
+
+    function showError(msg) {
+      formErr.textContent = msg;
+      formErr.classList.add('visible');
+    }
+    function hideError() { formErr.classList.remove('visible'); }
+
+    function setLoading(on) {
+      submitBtn.disabled    = on;
+      spinner.style.display = on ? 'block' : 'none';
+      submitText.textContent= on ? 'Creating account...' : 'Create account';
+      submitArrow.style.display = on ? 'none' : '';
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideError();
+
+      const name  = nameInput.value.trim();
+      const email = emailInput.value.trim().toLowerCase();
+      const pass  = pwInput.value;
+
+      // Validate
+      if (!name)  { showError('Please enter your full name.'); nameInput.focus(); return; }
+      if (!email || !/\S+@\S+\.\S+/.test(email)) { showError('Please enter a valid email address.'); emailInput.focus(); return; }
+      if (pass.length < 8) { showError('Password must be at least 8 characters.'); pwInput.focus(); return; }
+      if (!termsChk.checked) { showError('Please accept the Terms of Use to continue.'); return; }
+
+      setLoading(true);
+
+      try {
+        // Sign up with Supabase — this sends OTP to email
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password: pass,
+          options: {
+            data: { full_name: name },
+            emailRedirectTo: window.location.origin + '/verify.html'
+          }
+        });
+
+        if (error) throw error;
+
+        // Store email and name for verify page
+        sessionStorage.setItem('clix-verify-email', email);
+        sessionStorage.setItem('clix-verify-name', name);
+
+        // Redirect to verify page
+        window.location.href = 'verify.html';
+
+      } catch (err) {
+        let msg = err.message || 'Something went wrong. Please try again.';
+        if (msg.includes('already registered')) msg = 'An account with this email already exists. Try signing in instead.';
+        if (msg.includes('invalid email'))       msg = 'Please enter a valid email address.';
+        if (msg.includes('weak password'))       msg = 'Password is too weak. Use at least 8 characters with numbers and letters.';
+        showError(msg);
+        setLoading(false);
+      }
+    });
+
+    // ── Sign in link — same form but different mode ─
+    let isSignIn = false;
+    document.getElementById('signinLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      isSignIn = !isSignIn;
+
+      if (isSignIn) {
+        document.querySelector('.card-title').textContent = 'Welcome back';
+        document.querySelector('.card-sub').textContent   = 'Sign in to your CLIX account.';
+        document.getElementById('nameInput').closest('.field-group').style.display = 'none';
+        document.querySelector('.terms-row').style.display = 'none';
+        document.getElementById('submitText').textContent  = 'Sign in';
+        document.getElementById('signinLink').textContent  = 'Create new account';
+
+        form.onsubmit = async (e) => {
+          e.preventDefault();
+          hideError();
+          const email = emailInput.value.trim().toLowerCase();
+          const pass  = pwInput.value;
+          if (!email) { showError('Enter your email address.'); return; }
+          if (!pass)  { showError('Enter your password.'); return; }
+          setLoading(true);
+          try {
+            const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
+            if (error) throw error;
+            window.location.href = 'builder.html';
+          } catch (err) {
+            let msg = err.message || 'Sign in failed.';
+            if (msg.includes('Invalid login')) msg = 'Incorrect email or password. Please try again.';
+            showError(msg);
+            setLoading(false);
+          }
+        };
+      } else {
+        document.querySelector('.card-title').textContent = 'Create your account';
+        document.querySelector('.card-sub').textContent   = 'Get started in under a minute.';
+        document.getElementById('nameInput').closest('.field-group').style.display = '';
+        document.querySelector('.terms-row').style.display = '';
+        document.getElementById('submitText').textContent  = 'Create account';
+        document.getElementById('signinLink').textContent  = 'Sign in instead';
+        form.onsubmit = null;
+      }
+    });
+  </script>
+</body>
+</html>

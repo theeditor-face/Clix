@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Builder — CLIX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23080812'/><text y='.9em' x='.1em' font-size='80'>✦</text></svg>" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style>
+    :root {
+      --bg:         #080812;
+      --bg-card:    #0d0d1a;
+      --bg-hover:   #111122;
+      --bg-input:   #0a0a16;
+      --bg-sidebar: #0b0b16;
+      --border:     rgba(255,255,255,0.07);
+      --border-hi:  rgba(46,185,223,0.20);
+      --text-1:     #e8e8f0;
+      --text-2:     #7878a0;
+      --text-3:     #3a3a58;
+      --accent:     #2eb9df;
+      --accent-dim: rgba(46,185,223,0.09);
+      --accent-glow:rgba(46,185,223,0.28);
+      --red:        #f7516a;
+      --red-dim:    rgba(247,81,106,0.10);
+      --green:      #1de9b0;
+      --gold:       #f5c842;
+      --gold-dim:   rgba(245,200,66,0.10);
+      --f-display:  'Bricolage Grotesque', sans-serif;
+      --f-body:     'Inter', sans-serif;
+      --f-mono:     'JetBrains Mono', monospace;
+      --nav-h:      58px;
+      --r:          12px;
+      --r-sm:       8px;
+    }
+    [data-theme="light"] {
+      --bg:         #f5f5fb;
+      --bg-card:    #ffffff;
+      --bg-hover:   #ebebf5;
+      --bg-input:   #f0f0fa;
+      --bg-sidebar: #f0f0f8;
+      --border:     rgba(0,0,0,0.08);
+      --border-hi:  rgba(46,130,200,0.20);
+      --text-1:     #09090f;
+      --text-2:     #50507a;
+      --text-3:     #9898b8;
+      --accent:     #1a7fc4;
+      --accent-dim: rgba(26,127,196,0.08);
+      --accent-glow:rgba(26,127,196,0.20);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      font-family: var(--f-body);
+      background: var(--bg);
+      color: var(--text-1);
+      display: flex; flex-direction: column;
+      transition: background .3s, color .3s;
+    }
+    button { cursor: pointer; font-family: var(--f-body); background: none; border: none; color: inherit; }
+    ::selection { background: var(--accent-dim); color: var(--accent); }
+
+    /* ══ NAVBAR ══════════════════════════════════════ */
+    .navbar {
+      height: var(--nav-h);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      z-index: 100;
+    }
+
+    .nav-left { display: flex; align-items: center; gap: 14px; }
+    .brand { display: flex; align-items: center; gap: 9px; text-decoration: none; color: inherit; }
+    .brand-mark {
+      width: 30px; height: 30px; background: var(--accent); border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; color: var(--bg); font-weight: 900;
+    }
+    .brand-name { font-family: var(--f-display); font-size: 18px; font-weight: 800; letter-spacing: .06em; }
+
+    .nav-divider { width: 1px; height: 20px; background: var(--border); }
+
+    .nav-user {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--text-2);
+    }
+    .user-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #7c6af7);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--f-display); font-weight: 700; font-size: 12px;
+      color: #fff; flex-shrink: 0;
+    }
+    .quota-badge {
+      display: flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 99px;
+      background: var(--accent-dim); border: 1px solid var(--border-hi);
+      font-size: 12px; font-weight: 600; color: var(--accent);
+      font-family: var(--f-mono);
+    }
+    .quota-dot { width: 5px; height: 5px; background: var(--accent); border-radius: 50%; animation: qPulse 2s ease-in-out infinite; }
+    @keyframes qPulse { 0%,100%{box-shadow:0 0 0 0 var(--accent-glow)} 50%{box-shadow:0 0 0 4px transparent} }
+
+    .nav-right { display: flex; align-items: center; gap: 8px; }
+    .nav-btn {
+      padding: 7px 14px; border-radius: var(--r-sm);
+      font-size: 13px; font-weight: 500; color: var(--text-2);
+      transition: color .15s, background .15s;
+    }
+    .nav-btn:hover { color: var(--text-1); background: var(--bg-hover); }
+    .nav-btn-icon {
+      width: 32px; height: 32px; border-radius: var(--r-sm);
+      background: var(--bg-hover); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: var(--text-2);
+      transition: color .15s;
+    }
+    .nav-btn-icon:hover { color: var(--text-1); }
+
+    /* ══ LAYOUT ══════════════════════════════════════ */
+    .app-body {
+      flex: 1; display: flex; overflow: hidden;
+    }
+
+    /* ══ SIDEBAR ══════════════════════════════════════ */
+    .sidebar {
+      width: 220px; flex-shrink: 0;
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-section { padding: 14px 14px 8px; }
+    .sidebar-label {
+      font-family: var(--f-mono); font-size: 9px;
+      letter-spacing: .16em; color: var(--text-3);
+      text-transform: uppercase; margin-bottom: 8px;
+    }
+    .sidebar-divider { height: 1px; background: var(--border); margin: 6px 0; }
+
+    /* Site type buttons */
+    .type-list { display: flex; flex-direction: column; gap: 2px; }
+    .type-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px; border-radius: var(--r-sm);
+      font-size: 13px; font-weight: 500; color: var(--text-2);
+      transition: all .15s; cursor: pointer;
+    }
+    .type-item:hover { background: var(--bg-hover); color: var(--text-1); }
+    .type-item.active { background: var(--accent-dim); color: var(--accent); }
+    .type-item-icon { font-size: 15px; width: 20px; text-align: center; }
+
+    /* History list */
+    .history-scroll {
+      flex: 1; overflow-y: auto;
+      padding: 0 14px 14px;
+      scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+    }
+    .hist-empty {
+      text-align: center; padding: 24px 0;
+      font-size: 12px; color: var(--text-3);
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    .hist-item {
+      padding: 10px 10px; border-radius: var(--r-sm);
+      cursor: pointer; transition: background .15s; margin-bottom: 4px;
+      border-left: 2px solid transparent;
+    }
+    .hist-item:hover { background: var(--bg-hover); border-left-color: var(--accent); }
+    .hist-title { font-size: 12px; font-weight: 500; color: var(--text-1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 3px; }
+    .hist-meta  { font-family: var(--f-mono); font-size: 10px; color: var(--text-3); display: flex; gap: 8px; }
+
+    /* Ad slot */
+    .sidebar-ad {
+      margin: auto 14px 14px;
+      border: 1px dashed var(--border);
+      border-radius: var(--r-sm);
+      min-height: 90px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ad-placeholder-text { font-family: var(--f-mono); font-size: 9px; color: var(--text-3); letter-spacing: .12em; }
+
+    /* ══ MAIN AREA ════════════════════════════════════ */
+    .main-area {
+      flex: 1; display: flex; flex-direction: column; overflow: hidden;
+    }
+
+    /* ── PROMPT ZONE (shown when not generating) ── */
+    .prompt-zone {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 40px 32px;
+      overflow-y: auto;
+    }
+
+    .prompt-greeting {
+      font-family: var(--f-display);
+      font-size: clamp(24px, 3vw, 36px); font-weight: 800;
+      letter-spacing: -.01em; color: var(--text-1);
+      text-align: center; margin-bottom: 8px;
+    }
+    .prompt-tagline {
+      font-size: 15px; color: var(--text-2);
+      text-align: center; margin-bottom: 36px;
+    }
+
+    /* Prompt input */
+    .prompt-input-wrap {
+      width: 100%; max-width: 680px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: border-color .15s, box-shadow .15s;
+      margin-bottom: 16px;
+    }
+    .prompt-input-wrap:focus-within {
+      border-color: var(--border-hi);
+      box-shadow: 0 0 0 4px var(--accent-dim), 0 16px 48px rgba(0,0,0,0.3);
+    }
+    .prompt-textarea {
+      width: 100%;
+      padding: 20px 22px 12px;
+      background: transparent; border: none;
+      color: var(--text-1); font-size: 15px; line-height: 1.65;
+      resize: none; outline: none; min-height: 90px;
+      font-family: var(--f-body);
+    }
+    .prompt-textarea::placeholder { color: var(--text-3); }
+    .prompt-input-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 16px 14px;
+      border-top: 1px solid var(--border);
+    }
+    .prompt-char { font-family: var(--f-mono); font-size: 11px; color: var(--text-3); }
+    .prompt-actions { display: flex; align-items: center; gap: 8px; }
+    .prompt-clear-btn {
+      padding: 6px 12px; border-radius: var(--r-sm);
+      font-size: 12px; color: var(--text-3);
+      transition: color .15s, background .15s;
+    }
+    .prompt-clear-btn:hover { background: var(--bg-hover); color: var(--text-2); }
+
+    .prompt-submit-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 20px;
+      background: var(--accent); color: var(--bg);
+      border-radius: var(--r-sm);
+      font-family: var(--f-display); font-size: 13px; font-weight: 700;
+      letter-spacing: .03em;
+      transition: transform .15s, box-shadow .15s, opacity .15s;
+    }
+    .prompt-submit-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px var(--accent-glow); }
+    .prompt-submit-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* Ad gate notice */
+    .ad-gate-notice {
+      display: flex; align-items: center; gap: 8px;
+      width: 100%; max-width: 680px;
+      padding: 10px 14px;
+      background: var(--gold-dim);
+      border: 1px solid rgba(245,200,66,0.18);
+      border-radius: var(--r-sm);
+      font-size: 13px; color: var(--gold);
+      margin-bottom: 12px;
+    }
+
+    /* Rewarded ad area */
+    .rewarded-ad-area {
+      width: 100%; max-width: 680px;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--r-sm); padding: 16px;
+      margin-bottom: 16px; display: none;
+    }
+    .rewarded-ad-label { font-family: var(--f-mono); font-size: 10px; color: var(--text-3); letter-spacing: .12em; margin-bottom: 10px; display: block; }
+    .rewarded-ad-slot  { min-height: 80px; background: var(--bg-hover); border: 1px dashed var(--border); border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; padding: 16px; }
+    .dev-sim-btn { padding: 6px 14px; border: 1px solid var(--border); border-radius: var(--r-sm); font-size: 12px; color: var(--text-2); transition: background .15s; }
+    .dev-sim-btn:hover { background: var(--bg-hover); color: var(--text-1); }
+
+    /* Suggestion chips */
+    .suggestions {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      justify-content: center;
+      width: 100%; max-width: 680px;
+    }
+    .chip {
+      padding: 7px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      font-size: 13px; font-weight: 500; color: var(--text-2);
+      cursor: pointer; transition: all .15s;
+      white-space: nowrap;
+    }
+    .chip:hover { border-color: var(--border-hi); background: var(--bg-hover); color: var(--text-1); }
+
+    /* ── BUILDING ZONE (split view) ── */
+    .building-zone {
+      flex: 1; display: none; overflow: hidden;
+      flex-direction: column;
+    }
+
+    .build-toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px;
+      height: 44px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .build-tabs { display: flex; gap: 2px; }
+    .build-tab {
+      padding: 6px 14px; border-radius: var(--r-sm);
+      font-size: 13px; font-weight: 500; color: var(--text-2);
+      transition: all .15s;
+    }
+    .build-tab:hover { background: var(--bg-hover); color: var(--text-1); }
+    .build-tab.active { background: var(--bg-hover); color: var(--text-1); }
+    .build-actions { display: flex; align-items: center; gap: 8px; }
+    .build-action-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: var(--r-sm);
+      font-size: 12px; font-weight: 500; color: var(--text-2);
+      border: 1px solid var(--border);
+      transition: all .15s;
+    }
+    .build-action-btn:hover { color: var(--text-1); background: var(--bg-hover); border-color: var(--border-hi); }
+    .build-action-btn.primary {
+      background: var(--accent); color: var(--bg);
+      border-color: transparent;
+    }
+    .build-action-btn.primary:hover { box-shadow: 0 4px 16px var(--accent-glow); transform: translateY(-1px); }
+
+    .split-view {
+      flex: 1; display: grid;
+      grid-template-columns: 1fr 1fr;
+      overflow: hidden;
+    }
+
+    /* Code panel */
+    .code-panel {
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .code-panel-header {
+      display: flex; align-items: center; gap: 0;
+      background: var(--bg-hover);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .code-file-tab {
+      padding: 9px 16px;
+      font-family: var(--f-mono); font-size: 12px;
+      color: var(--text-3); border-right: 1px solid var(--border);
+      border-bottom: 2px solid transparent;
+      transition: all .15s; cursor: pointer;
+    }
+    .code-file-tab:hover { color: var(--text-2); }
+    .code-file-tab.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--bg-card); }
+
+    .code-body {
+      flex: 1; overflow: auto;
+      padding: 16px;
+      font-family: var(--f-mono); font-size: 12.5px; line-height: 1.8;
+      color: var(--text-2);
+      background: var(--bg);
+      scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+      white-space: pre;
+      position: relative;
+    }
+
+    /* Generating animation overlay on code panel */
+    .generating-overlay {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 12px 16px;
+      background: linear-gradient(to top, var(--bg) 40%, transparent);
+      display: flex; align-items: center; gap: 10px;
+      font-family: var(--f-mono); font-size: 12px; color: var(--accent);
+    }
+    .gen-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: genPulse 1s ease-in-out infinite; }
+    @keyframes genPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+
+    /* Preview panel */
+    .preview-panel {
+      display: flex; flex-direction: column; overflow: hidden;
+      background: #fff;
+    }
+    .preview-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 14px; height: 36px;
+      background: var(--bg-hover); border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .preview-dot { width: 9px; height: 9px; border-radius: 50%; }
+    .preview-dot.r { background: #ff5f57; }
+    .preview-dot.y { background: #ffbd2e; }
+    .preview-dot.g { background: #28ca41; }
+    .preview-url {
+      flex: 1; text-align: center;
+      font-family: var(--f-mono); font-size: 11px; color: var(--text-3);
+    }
+    .preview-frame {
+      flex: 1; border: none; display: block;
+      background: #fff;
+    }
+
+    /* Generating skeleton in preview */
+    .preview-skeleton {
+      flex: 1; display: none;
+      flex-direction: column; gap: 14px;
+      padding: 24px; background: var(--bg-card);
+    }
+    .sk { background: linear-gradient(90deg, var(--bg-hover) 25%, var(--bg-card) 50%, var(--bg-hover) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .sk-title   { height: 28px; width: 55%; }
+    .sk-bar     { height: 14px; }
+    .sk-short   { width: 70%; }
+    .sk-preview { height: 200px; border-radius: 10px; }
+
+    /* Share modal */
+    .share-modal {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(8,8,18,0.85); backdrop-filter: blur(12px);
+      display: none; align-items: center; justify-content: center; padding: 20px;
+    }
+    .share-modal.open { display: flex; }
+    .share-card {
+      background: var(--bg-card); border: 1px solid var(--border-hi);
+      border-radius: 20px; padding: 36px 32px;
+      max-width: 360px; width: 100%;
+      text-align: center;
+      animation: popIn .3s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    @keyframes popIn { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:none} }
+    .share-title { font-family: var(--f-display); font-size: 20px; font-weight: 800; color: var(--text-1); margin-bottom: 6px; }
+    .share-sub   { font-size: 13px; color: var(--text-2); margin-bottom: 22px; }
+    .share-btns  { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+    .share-btn   { display: flex; align-items: center; justify-content: center; padding: 12px; border-radius: var(--r-sm); font-size: 14px; font-weight: 600; transition: transform .15s; }
+    .share-btn:hover { transform: translateY(-2px); }
+    .share-x  { background: #000; color: #fff; }
+    .share-wa { background: #25d366; color: #fff; }
+    .share-tg { background: #229ed9; color: #fff; }
+    .share-close-btn { font-size: 13px; color: var(--text-2); transition: color .15s; }
+    .share-close-btn:hover { color: var(--text-1); }
+
+    /* Toast */
+    .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 900; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+    .toast {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px;
+      background: var(--bg-card); border: 1px solid var(--border-hi);
+      border-radius: var(--r-sm); box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      font-size: 13px; color: var(--text-1);
+      pointer-events: all; min-width: 220px; max-width: 300px;
+      animation: toastIn .25s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    @keyframes toastIn { from{opacity:0;transform:translateX(24px)} to{opacity:1;transform:none} }
+    .toast.out { animation: toastOut .2s ease forwards; }
+    @keyframes toastOut { to{opacity:0;transform:translateX(24px)} }
+    .toast.success { border-left: 2px solid var(--green); }
+    .toast.error   { border-left: 2px solid var(--red); }
+    .toast.info    { border-left: 2px solid var(--accent); }
+    .toast.warn    { border-left: 2px solid var(--gold); }
+
+    /* Mobile sidebar toggle */
+    .mob-sidebar-btn {
+      display: none;
+      width: 32px; height: 32px;
+      background: var(--bg-hover); border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      align-items: center; justify-content: center;
+      font-size: 14px; color: var(--text-2);
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; position: fixed; z-index: 200; top: var(--nav-h); left: 0; bottom: 0; transition: transform .25s; }
+      .sidebar.open { display: flex; transform: translateX(0); }
+      .mob-sidebar-btn { display: flex; }
+      .split-view { grid-template-columns: 1fr; }
+      .code-panel { display: none; }
+      .build-tab[data-panel="code"] { display: flex; }
+      .code-panel.show { display: flex; }
+      .preview-panel.hide { display: none; }
+    }
+    @media (max-width: 600px) {
+      .prompt-zone { padding: 24px 16px; }
+      .prompt-greeting { font-size: 22px; }
+      .suggestions { gap: 6px; }
+      .chip { font-size: 12px; padding: 6px 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══ NAVBAR ══════════════════════════════════════ -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <button class="mob-sidebar-btn" id="mobSidebarBtn">☰</button>
+      <a href="index.html" class="brand">
+        <div class="brand-mark">✦</div>
+        <span class="brand-name">CLIX</span>
+      </a>
+      <div class="nav-divider"></div>
+      <div class="nav-user">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <span id="userEmail" style="font-size:13px;color:var(--text-2);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="quota-badge" id="quotaBadge">
+        <span class="quota-dot"></span>
+        <span id="quotaText">3 left</span>
+      </div>
+      <a href="history.html" class="nav-btn">History</a>
+      <button class="nav-btn-icon" id="themeToggle" title="Toggle theme">
+        <span class="icon-moon">🌙</span>
+        <span class="icon-sun" style="display:none;">☀️</span>
+      </button>
+      <button class="nav-btn" id="logoutBtn" style="color:var(--text-3);">Log out</button>
+    </div>
+  </nav>
+
+  <!-- ══ APP BODY ══════════════════════════════════════ -->
+  <div class="app-body">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-section">
+        <p class="sidebar-label">Site type</p>
+        <div class="type-list" id="typeList">
+          <div class="type-item active" data-type="landing">
+            <span class="type-item-icon">🏠</span> Landing page
+          </div>
+          <div class="type-item" data-type="portfolio">
+            <span class="type-item-icon">🎨</span> Portfolio
+          </div>
+          <div class="type-item" data-type="blog">
+            <span class="type-item-icon">📝</span> Blog
+          </div>
+          <div class="type-item" data-type="ecommerce">
+            <span class="type-item-icon">🛒</span> Store
+          </div>
+          <div class="type-item" data-type="dashboard">
+            <span class="type-item-icon">📊</span> Dashboard
+          </div>
+          <div class="type-item" data-type="saas">
+            <span class="type-item-icon">🚀</span> SaaS / Startup
+          </div>
+          <div class="type-item" data-type="custom">
+            <span class="type-item-icon">⚡</span> Custom
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="sidebar-section">
+        <p class="sidebar-label">Build history</p>
+      </div>
+      <div class="history-scroll" id="historyScroll">
+        <div class="hist-empty" id="histEmpty">
+          <span style="font-size:24px;opacity:.3;">🕒</span>
+          <span>No builds yet</span>
+          <span style="font-size:11px;">Your history appears here</span>
+        </div>
+      </div>
+
+      <div class="sidebar-ad">
+        <span class="ad-placeholder-text">ADVERTISEMENT</span>
+        <!-- INSERT ADSTERRA AD SCRIPT HERE -->
+      </div>
+    </aside>
+
+    <!-- Main area -->
+    <div class="main-area">
+
+      <!-- PROMPT ZONE -->
+      <div class="prompt-zone" id="promptZone">
+
+        <h1 class="prompt-greeting" id="promptGreeting">What are we building?</h1>
+        <p class="prompt-tagline">Describe your site in detail. The more specific, the better.</p>
+
+        <!-- Ad gate notice -->
+        <div class="ad-gate-notice" id="adGateNotice">
+          ⚡ Watch the short ad below to unlock your generation
+        </div>
+
+        <!-- Rewarded ad -->
+        <div class="rewarded-ad-area" id="rewardedAdArea">
+          <span class="rewarded-ad-label">// SPONSORED · WATCH TO UNLOCK</span>
+          <div class="rewarded-ad-slot">
+            <span style="font-size:12px;color:var(--text-3)">Ad loads here</span>
+            <!-- DEV ONLY — remove in production -->
+            <button class="dev-sim-btn" id="devSimBtn">▶ Simulate ad complete (dev only)</button>
+          </div>
+        </div>
+
+        <!-- Prompt input -->
+        <div class="prompt-input-wrap" id="promptInputWrap">
+          <textarea
+            class="prompt-textarea"
+            id="promptTextarea"
+            placeholder="e.g. A dark minimal portfolio for a photographer named Zara — full-screen hero image, smooth scroll, minimal nav, contact form at the bottom..."
+            maxlength="1000"
+            rows="3"
+          ></textarea>
+          <div class="prompt-input-footer">
+            <span class="prompt-char" id="charCount">0 / 1000</span>
+            <div class="prompt-actions">
+              <button class="prompt-clear-btn" id="clearBtn">Clear</button>
+              <button class="prompt-submit-btn" id="submitBtn" disabled>
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                Generate
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Suggestion chips -->
+        <div class="suggestions" id="suggestions">
+          <button class="chip" data-prompt="A dark portfolio website for a photographer named Zara. Full-screen hero image, minimal navigation, smooth scroll between sections, and a contact form at the bottom.">📸 Photographer portfolio</button>
+          <button class="chip" data-prompt="A modern SaaS landing page for an AI productivity tool called Focusly. Dark theme, bold headline, feature grid, pricing section, and a CTA button.">🚀 SaaS landing page</button>
+          <button class="chip" data-prompt="A personal blog website with a clean light theme. Header with navigation, featured post section, post card grid, and a simple footer.">📝 Personal blog</button>
+          <button class="chip" data-prompt="A gym and fitness landing page. Dark and energetic design, hero with background video placeholder, class schedule section, trainer profiles, and signup form.">💪 Gym website</button>
+          <button class="chip" data-prompt="A restaurant website for an Italian restaurant called Bella Roma. Warm colours, menu section, gallery, reservation form, and contact information.">🍕 Restaurant site</button>
+          <button class="chip" data-prompt="An e-commerce product page for a luxury watch brand. Dark background, large product image, product details, size selector, add to cart button, and reviews section.">⌚ Product page</button>
+          <button class="chip" data-prompt="A startup landing page for a fintech app called Payd. Clean white design, bold hero, three feature cards, testimonials section, and email signup.">💳 Fintech startup</button>
+          <button class="chip" data-prompt="A developer portfolio with dark theme. Hero with name and role, skills section, project cards with GitHub links, and a contact section.">👨‍💻 Developer portfolio</button>
+        </div>
+
+      </div>
+
+      <!-- BUILDING ZONE (split view) -->
+      <div class="building-zone" id="buildingZone">
+        <div class="build-toolbar">
+          <div class="build-tabs">
+            <button class="build-tab active" data-panel="preview" id="tabPreviewBtn">Preview</button>
+            <button class="build-tab" data-panel="code" id="tabCodeBtn">Code</button>
+          </div>
+          <div class="build-actions">
+            <button class="build-action-btn" id="copyCodeBtn">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy code
+            </button>
+            <button class="build-action-btn" id="shareOutputBtn">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              Share
+            </button>
+            <button class="build-action-btn" id="newBuildBtn">
+              + New build
+            </button>
+            <button class="build-action-btn primary" id="downloadBtn">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download ZIP
+            </button>
+          </div>
+        </div>
+
+        <div class="split-view">
+          <!-- Code panel -->
+          <div class="code-panel" id="codePanel">
+            <div class="code-panel-header">
+              <button class="code-file-tab active" data-file="html">index.html</button>
+              <button class="code-file-tab" data-file="css">style.css</button>
+              <button class="code-file-tab" data-file="js">script.js</button>
+            </div>
+            <div class="code-body" id="codeBody">
+              <div class="generating-overlay" id="genOverlay">
+                <div class="gen-dot"></div>
+                AI is writing your code...
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview panel -->
+          <div class="preview-panel" id="previewPanel">
+            <div class="preview-header">
+              <span class="preview-dot r"></span>
+              <span class="preview-dot y"></span>
+              <span class="preview-dot g"></span>
+              <span class="preview-url" id="previewUrl">clix-preview</span>
+            </div>
+            <div class="preview-skeleton" id="previewSkeleton">
+              <div class="sk sk-title"></div>
+              <div class="sk sk-bar"></div>
+              <div class="sk sk-bar sk-short"></div>
+              <div class="sk sk-preview"></div>
+            </div>
+            <iframe class="preview-frame" id="previewFrame" sandbox="allow-scripts allow-same-origin" title="Generated site preview"></iframe>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Share modal -->
+  <div class="share-modal" id="shareModal">
+    <div class="share-card">
+      <h3 class="share-title">Share your build</h3>
+      <p class="share-sub">Show the world what you made with CLIX</p>
+      <div class="share-btns">
+        <a class="share-btn share-x"  id="shareX"  href="#" target="_blank" rel="noopener">𝕏 Post on X</a>
+        <a class="share-btn share-wa" id="shareWa" href="#" target="_blank" rel="noopener">WhatsApp</a>
+        <a class="share-btn share-tg" id="shareTg" href="#" target="_blank" rel="noopener">Telegram</a>
+      </div>
+      <button class="share-close-btn" id="shareCloseBtn">Close</button>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    const supabase = createClient(
+      'https://kikimirbzsnlcydzjdco.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtpa2ltaXJienNubGN5ZHpqZGNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDcxOTgsImV4cCI6MjA4OTc4MzE5OH0.Q8Qm2_v2-1OycwjLJRBNBgAFNSlP7i3ZJtiq1qrfdtI'
+    );
+
+    // ── State ──────────────────────────────────────
+    let currentUser   = null;
+    let userQuota     = 3;
+    let adWatched     = false;
+    let selectedType  = 'landing';
+    let generatedCode = { html: '', css: '', js: '' };
+    let activeFile    = 'html';
+    let isGenerating  = false;
+
+    // ── Theme ──────────────────────────────────────
+    const html = document.documentElement;
+    const themeBtn = document.getElementById('themeToggle');
+    const iconMoon = themeBtn.querySelector('.icon-moon');
+    const iconSun  = themeBtn.querySelector('.icon-sun');
+    function applyTheme(t) {
+      html.setAttribute('data-theme', t);
+      localStorage.setItem('clix-theme', t);
+      iconMoon.style.display = t === 'dark'  ? '' : 'none';
+      iconSun.style.display  = t === 'light' ? '' : 'none';
+    }
+    applyTheme(localStorage.getItem('clix-theme') || 'dark');
+    themeBtn.addEventListener('click', () => applyTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+
+    // ── Auth guard ─────────────────────────────────
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) { window.location.href = 'signup.html'; }
+    currentUser = session.user;
+
+    // ── Set user info ──────────────────────────────
+    const name  = currentUser.user_metadata?.full_name || currentUser.email || '';
+    const initial = name.charAt(0).toUpperCase();
+    document.getElementById('userAvatar').textContent = initial;
+    document.getElementById('userEmail').textContent  = currentUser.email || '';
+
+    const firstName = (currentUser.user_metadata?.full_name || '').split(' ')[0];
+    if (firstName) {
+      document.getElementById('promptGreeting').textContent = `What are we building, ${firstName}?`;
+    }
+
+    // ── Auth state listener ────────────────────────
+    supabase.auth.onAuthStateChange((_event, s) => {
+      if (!s) window.location.href = 'signup.html';
+    });
+
+    // ── Load quota ─────────────────────────────────
+    async function loadQuota() {
+      try {
+        const { data } = await supabase.from('profiles')
+          .select('daily_count, quota_reset_at')
+          .eq('id', currentUser.id).single();
+        if (!data) return;
+        const resetAt  = new Date(data.quota_reset_at || 0);
+        const now      = new Date();
+        const isNewDay = now.toDateString() !== resetAt.toDateString();
+        if (isNewDay) {
+          await supabase.from('profiles').update({ daily_count: 0, quota_reset_at: now.toISOString() }).eq('id', currentUser.id);
+          userQuota = 3;
+        } else {
+          userQuota = Math.max(0, 3 - (data.daily_count || 0));
+        }
+        updateQuotaUI();
+      } catch(e) { console.warn(e); }
+    }
+    await loadQuota();
+
+    function updateQuotaUI() {
+      document.getElementById('quotaText').textContent = `${userQuota} left today`;
+      if (userQuota === 0) {
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('submitBtn').textContent = 'Limit reached';
+      }
+    }
+
+    // ── Load history ───────────────────────────────
+    async function loadHistory() {
+      try {
+        const { data } = await supabase.from('generations')
+          .select('id, title, site_type, created_at, html_output, css_output, js_output')
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        const scroll = document.getElementById('historyScroll');
+        const empty  = document.getElementById('histEmpty');
+
+        if (!data?.length) { empty.style.display = 'flex'; return; }
+        empty.style.display = 'none';
+        scroll.querySelectorAll('.hist-item').forEach(e => e.remove());
+
+        data.forEach(item => {
+          const el = document.createElement('div');
+          el.className = 'hist-item';
+          el.innerHTML = `
+            <div class="hist-title">${esc(item.title || 'Untitled')}</div>
+            <div class="hist-meta">
+              <span>${item.site_type || 'custom'}</span>
+              <span>${timeAgo(item.created_at)}</span>
+            </div>`;
+          el.addEventListener('click', () => {
+            generatedCode = { html: item.html_output || '', css: item.css_output || '', js: item.js_output || '' };
+            showBuildingZone();
+            renderPreview();
+            renderCode(activeFile);
+            document.getElementById('previewSkeleton').style.display = 'none';
+            document.getElementById('previewFrame').style.display = '';
+            document.getElementById('genOverlay').style.display = 'none';
+            toast('Build loaded from history', 'info');
+          });
+          scroll.insertBefore(el, empty);
+        });
+      } catch(e) { console.warn(e); }
+    }
+    await loadHistory();
+
+    // ── Logout ─────────────────────────────────────
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = 'index.html';
+    });
+
+    // ── Mobile sidebar ─────────────────────────────
+    document.getElementById('mobSidebarBtn').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('open');
+    });
+
+    // ── Site type selection ────────────────────────
+    document.getElementById('typeList').addEventListener('click', e => {
+      const item = e.target.closest('.type-item');
+      if (!item) return;
+      document.querySelectorAll('.type-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+      selectedType = item.dataset.type;
+    });
+
+    // ── Prompt input ───────────────────────────────
+    const textarea  = document.getElementById('promptTextarea');
+    const charCount = document.getElementById('charCount');
+    const clearBtn  = document.getElementById('clearBtn');
+    const submitBtn = document.getElementById('submitBtn');
+
+    textarea.addEventListener('input', () => {
+      const len = textarea.value.length;
+      charCount.textContent = `${len} / 1000`;
+    });
+
+    clearBtn.addEventListener('click', () => {
+      textarea.value = '';
+      charCount.textContent = '0 / 1000';
+      textarea.focus();
+    });
+
+    // Suggestion chips
+    document.getElementById('suggestions').addEventListener('click', e => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      textarea.value = chip.dataset.prompt;
+      charCount.textContent = `${chip.dataset.prompt.length} / 1000`;
+      textarea.focus();
+    });
+
+    // ── Ad gate ────────────────────────────────────
+    document.getElementById('rewardedAdArea').style.display = '';
+
+    window.onAdComplete = function() {
+      adWatched = true;
+      document.getElementById('adGateNotice').style.display = 'none';
+      document.getElementById('rewardedAdArea').style.display = 'none';
+      if (userQuota > 0) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Generate`;
+      }
+      toast('Ad complete — ready to build!', 'success');
+    };
+
+    document.getElementById('devSimBtn').addEventListener('click', () => window.onAdComplete());
+
+    // ── Generate ────────────────────────────────────
+    submitBtn.addEventListener('click', async () => {
+      if (isGenerating) return;
+      const prompt = textarea.value.trim();
+      if (!prompt)      { toast('Describe what you want to build first.', 'warn'); textarea.focus(); return; }
+      if (!adWatched)   { toast('Watch the short ad first.', 'warn'); return; }
+      if (userQuota <= 0){ toast('Daily limit reached. Come back tomorrow!', 'warn'); return; }
+      await generate(prompt);
+    });
+
+    async function generate(prompt) {
+      isGenerating = true;
+      adWatched    = false;
+
+      showBuildingZone();
+
+      // Reset panels
+      document.getElementById('codeBody').textContent = '';
+      document.getElementById('genOverlay').style.display = '';
+      document.getElementById('previewSkeleton').style.display = 'flex';
+      document.getElementById('previewFrame').style.display = 'none';
+      document.getElementById('previewFrame').srcdoc = '';
+
+      try {
+        const s = (await supabase.auth.getSession()).data.session;
+
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt,
+            siteType:  selectedType,
+            userToken: s?.access_token
+          })
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.message || 'Generation failed');
+        }
+
+        // Handle streaming response
+        const reader  = res.body.getReader();
+        const decoder = new TextDecoder();
+        let   buffer  = '';
+        let   fullResponse = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          buffer += chunk;
+          fullResponse += chunk;
+
+          // Stream code into panel
+          streamCodeToPanel(fullResponse);
+        }
+
+        // Parse final response
+        const data = parseGenResponse(fullResponse);
+        generatedCode = { html: data.html || '', css: data.css || '', js: data.js || '' };
+
+        // Show result
+        document.getElementById('genOverlay').style.display = 'none';
+        renderCode(activeFile);
+        renderPreview();
+
+        // Update quota
+        await supabase.from('profiles').rpc('increment_daily_count', { user_id: currentUser.id }).catch(() => {
+          // Fallback manual increment
+          supabase.from('profiles').select('daily_count').eq('id', currentUser.id).single().then(({ data: d }) => {
+            supabase.from('profiles').update({ daily_count: (d?.daily_count || 0) + 1 }).eq('id', currentUser.id);
+          });
+        });
+        userQuota = Math.max(0, userQuota - 1);
+        updateQuotaUI();
+
+        // Update global counter
+        supabase.from('global_stats').select('daily_count').eq('id', 1).single().then(({ data: g }) => {
+          supabase.from('global_stats').update({ daily_count: (g?.daily_count || 0) + 1 }).eq('id', 1);
+        });
+
+        // Save to history
+        await supabase.from('generations').insert({
+          user_id:     currentUser.id,
+          prompt,
+          title:       prompt.slice(0, 50) + (prompt.length > 50 ? '...' : ''),
+          site_type:   selectedType,
+          model_used:  data.modelUsed || 'unknown',
+          html_output: generatedCode.html,
+          css_output:  generatedCode.css,
+          js_output:   generatedCode.js
+        });
+
+        await loadHistory();
+        toast('Your site is ready! 🎉', 'success');
+
+        // Reset ad gate for next build
+        document.getElementById('adGateNotice').style.display = '';
+        document.getElementById('rewardedAdArea').style.display = '';
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Generate`;
+
+      } catch(err) {
+        toast(err.message || 'Something went wrong. Please try again.', 'error');
+        showPromptZone();
+      }
+
+      isGenerating = false;
+    }
+
+    function streamCodeToPanel(raw) {
+      // Show streaming text in code panel
+      const body = document.getElementById('codeBody');
+      const overlay = document.getElementById('genOverlay');
+
+      // Try to extract partial HTML
+      let display = raw;
+      try {
+        const parsed = parseGenResponse(raw);
+        display = parsed.html || raw;
+      } catch { display = raw; }
+
+      body.textContent = display;
+      body.scrollTop = body.scrollHeight;
+      overlay.style.display = '';
+
+      // Update preview with whatever we have
+      try {
+        const partial = parseGenResponse(raw);
+        if (partial.html && partial.html.length > 100) {
+          document.getElementById('previewSkeleton').style.display = 'none';
+          document.getElementById('previewFrame').style.display = '';
+          document.getElementById('previewFrame').srcdoc =
+            `<!DOCTYPE html><html><head><style>${partial.css || ''}</style></head><body>${partial.html}<script>${partial.js || ''}<\/script></body></html>`;
+        }
+      } catch {}
+    }
+
+    function parseGenResponse(raw) {
+      let clean = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+      const start = clean.indexOf('{');
+      const end   = clean.lastIndexOf('}');
+      if (start === -1 || end === -1) return { html: clean, css: '', js: '' };
+      try {
+        const parsed = JSON.parse(clean.slice(start, end + 1));
+        return { html: parsed.html || '', css: parsed.css || '', js: parsed.js || '', modelUsed: parsed.modelUsed };
+      } catch {
+        return { html: clean, css: '', js: '' };
+      }
+    }
+
+    // ── Zone switching ─────────────────────────────
+    function showBuildingZone() {
+      document.getElementById('promptZone').style.display = 'none';
+      document.getElementById('buildingZone').style.display = 'flex';
+    }
+    function showPromptZone() {
+      document.getElementById('buildingZone').style.display = 'none';
+      document.getElementById('promptZone').style.display = '';
+    }
+
+    // ── New build ──────────────────────────────────
+    document.getElementById('newBuildBtn').addEventListener('click', () => {
+      showPromptZone();
+      document.getElementById('adGateNotice').style.display = '';
+      document.getElementById('rewardedAdArea').style.display = '';
+      submitBtn.disabled = true;
+    });
+
+    // ── Code panel tabs ────────────────────────────
+    document.querySelectorAll('.code-file-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.code-file-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        activeFile = tab.dataset.file;
+        renderCode(activeFile);
+      });
+    });
+
+    function renderCode(file) {
+      const map = { html: generatedCode.html, css: generatedCode.css, js: generatedCode.js };
+      document.getElementById('codeBody').textContent = map[file] || '';
+    }
+
+    // ── Preview / Code toggle (mobile) ────────────
+    document.getElementById('tabPreviewBtn').addEventListener('click', () => {
+      document.getElementById('tabPreviewBtn').classList.add('active');
+      document.getElementById('tabCodeBtn').classList.remove('active');
+      document.getElementById('previewPanel').classList.remove('hide');
+      document.getElementById('codePanel').classList.remove('show');
+    });
+    document.getElementById('tabCodeBtn').addEventListener('click', () => {
+      document.getElementById('tabCodeBtn').classList.add('active');
+      document.getElementById('tabPreviewBtn').classList.remove('active');
+      document.getElementById('codePanel').classList.add('show');
+      document.getElementById('previewPanel').classList.add('hide');
+    });
+
+    // ── Preview render ─────────────────────────────
+    function renderPreview() {
+      document.getElementById('previewSkeleton').style.display = 'none';
+      const frame = document.getElementById('previewFrame');
+      frame.style.display = '';
+      frame.srcdoc = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${generatedCode.css}</style></head><body>${generatedCode.html}<script>${generatedCode.js}<\/script><!-- Built with CLIX ✦ --></body></html>`;
+    }
+
+    // ── Copy code ──────────────────────────────────
+    document.getElementById('copyCodeBtn').addEventListener('click', async () => {
+      const text = ({ html: generatedCode.html, css: generatedCode.css, js: generatedCode.js })[activeFile] || '';
+      try {
+        await navigator.clipboard.writeText(text);
+        toast('Copied to clipboard!', 'success');
+      } catch { toast('Copy failed', 'error'); }
+    });
+
+    // ── Download ZIP ───────────────────────────────
+    document.getElementById('downloadBtn').addEventListener('click', async () => {
+      if (!generatedCode.html) { toast('Nothing to download yet', 'warn'); return; }
+      try {
+        const zip = new JSZip();
+        zip.file('index.html', `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="style.css"></head><body>${generatedCode.html}<script src="script.js"><\/script><!-- Built with CLIX ✦ --></body></html>`);
+        zip.file('style.css',  generatedCode.css  || '');
+        zip.file('script.js',  generatedCode.js   || '');
+        zip.file('README.md',  `# Built with CLIX ✦\nhttps://clix.app\n`);
+        const blob = await zip.generateAsync({ type: 'blob' });
+        const url  = URL.createObjectURL(blob);
+        const a    = Object.assign(document.createElement('a'), { href: url, download: 'clix-site.zip' });
+        a.click(); URL.revokeObjectURL(url);
+        toast('ZIP downloaded!', 'success');
+      } catch { toast('Download failed', 'error'); }
+    });
+
+    // ── Share ──────────────────────────────────────
+    document.getElementById('shareOutputBtn').addEventListener('click', () => {
+      const t = encodeURIComponent('I just built a website in seconds with CLIX — free AI website builder! 🚀 https://clix.app');
+      document.getElementById('shareX').href  = `https://twitter.com/intent/tweet?text=${t}`;
+      document.getElementById('shareWa').href = `https://wa.me/?text=${t}`;
+      document.getElementById('shareTg').href = `https://t.me/share/url?url=https://clix.app&text=${encodeURIComponent('Built a site with CLIX 🚀')}`;
+      document.getElementById('shareModal').classList.add('open');
+    });
+    document.getElementById('shareCloseBtn').addEventListener('click', () => {
+      document.getElementById('shareModal').classList.remove('open');
+    });
+
+    // ── Toast ──────────────────────────────────────
+    function toast(msg, type = 'info') {
+      const icons = { success: '✓', error: '✕', info: '◈', warn: '⚡' };
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.innerHTML = `<span>${icons[type]}</span><span>${esc(msg)}</span>`;
+      document.getElementById('toastContainer').appendChild(el);
+      setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 220); }, 3500);
+    }
+
+    // ── Utils ──────────────────────────────────────
+    function esc(s) { const d = document.createElement('div'); d.appendChild(document.createTextNode(String(s||''))); return d.innerHTML; }
+    function timeAgo(iso) {
+      if (!iso) return '';
+      const d = Date.now() - new Date(iso);
+      if (d < 60000) return 'just now';
+      if (d < 3600000) return `${Math.floor(d/60000)}m ago`;
+      if (d < 86400000) return `${Math.floor(d/3600000)}h ago`;
+      return new Date(iso).toLocaleDateString();
+    }
+  </script>
+</body>
+</html>
