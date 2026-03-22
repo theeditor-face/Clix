@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ═══ SEO ═══ -->
+  <title>CLIX — Build Anything. One Prompt.</title>
+  <meta name="description" content="Generate production-ready HTML, CSS & JS websites instantly with AI for free. CLIX stacks 15 AI models so you never hit a wall." />
+  <meta name="keywords" content="AI website builder, free AI website generator, HTML CSS JS generator, OpenRouter AI, free website builder, AI coding tool" />
+  <meta name="author" content="CLIX" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#07070f" />
+
+  <!-- ═══ OPEN GRAPH ═══ -->
+  <meta property="og:title" content="CLIX — Build Anything. One Prompt." />
+  <meta property="og:description" content="Generate full websites instantly with AI. Free. Fast. Powerful." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://clix.app" />
+  <meta property="og:image" content="https://clix.app/og-image.png" />
+
+  <!-- ═══ TWITTER CARD ═══ -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="CLIX — Build Anything. One Prompt." />
+  <meta name="twitter:description" content="Generate full websites instantly with AI. Free. Fast. Powerful." />
+
+  <!-- ═══ STRUCTURED DATA ═══ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CLIX",
+    "description": "AI-powered website builder that generates HTML, CSS and JS from a single prompt",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+
+  <!-- ═══ FONTS ═══ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+
+  <!-- ═══ STYLES ═══ -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- ═══ FAVICON ═══ -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2307070f'/><text y='72' x='50' text-anchor='middle' font-size='60' fill='%2300f5ff'>✦</text></svg>" />
+</head>
+<body>
+
+  <!-- ░░░ CUSTOM CURSOR ░░░ -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-trail" id="cursorTrail"></div>
+
+  <!-- ░░░ GRAIN OVERLAY ░░░ -->
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- ═══════════════════════════════════════════════════
+       GLOBAL DAILY CAP OVERLAY
+  ═══════════════════════════════════════════════════ -->
+  <div class="overlay cap-overlay" id="capOverlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Daily limit reached">
+    <div class="cap-card">
+      <div class="cap-icon">⚡</div>
+      <h2 class="cap-title">CLIX is recharging.</h2>
+      <p class="cap-msg">
+        We've served <strong>3,000 generations</strong> today — every last one used
+        by builders like you. We reset at midnight. Come back and build something extraordinary.
+      </p>
+      <div class="cap-countdown">
+        <span class="cap-countdown-label">RESETS IN</span>
+        <div class="cap-timer">
+          <span class="cap-timer-seg" id="capHH">--</span>
+          <span class="cap-timer-colon">:</span>
+          <span class="cap-timer-seg" id="capMM">--</span>
+          <span class="cap-timer-colon">:</span>
+          <span class="cap-timer-seg" id="capSS">--</span>
+        </div>
+      </div>
+      <div class="cap-notify-form">
+        <input type="email" class="field" id="capEmailInput" placeholder="your@email.com" aria-label="Email for notification" />
+        <button class="btn-primary" id="capNotifyBtn">Notify me at reset →</button>
+      </div>
+      <p class="cap-fine-print">One email. No spam. Ever.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       ANONYMOUS / ABUSE OVERLAY
+  ═══════════════════════════════════════════════════ -->
+  <div class="overlay anon-overlay" id="anonOverlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Authentication required">
+    <div class="anon-card">
+      <div class="anon-terminal">
+        <div class="anon-bar">
+          <span class="t-dot t-red"></span>
+          <span class="t-dot t-yellow"></span>
+          <span class="t-dot t-green"></span>
+          <span class="anon-bar-title">system.log</span>
+        </div>
+        <div class="anon-body">
+          <div class="anon-line"><span class="anon-prompt">›</span><span class="anon-cmd"> identify_user()</span></div>
+          <div class="anon-line anon-d1"><span class="anon-prompt">›</span><span class="anon-warn"> WARNING: no session found</span></div>
+          <div class="anon-line anon-d2"><span class="anon-prompt">›</span><span class="anon-norm"> user_id: </span><span class="anon-glitch" data-text="ANONYMOUS_AI">ANONYMOUS_AI</span></div>
+          <div class="anon-line anon-d3"><span class="anon-prompt">›</span><span class="anon-dim"> access_level: restricted</span></div>
+          <div class="anon-line anon-d4"><span class="anon-prompt">›</span><span class="anon-cursor-blink"> ▋</span></div>
+        </div>
+      </div>
+      <h3 class="anon-title">We see you.</h3>
+      <p class="anon-msg">Create a free account to start building. It takes 30 seconds.</p>
+      <div class="anon-actions">
+        <button class="btn-primary" id="anonSignupBtn">Create account →</button>
+        <button class="btn-ghost" id="anonDismissBtn">I already have one</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       NAVBAR
+  ═══════════════════════════════════════════════════ -->
+  <nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-logo" aria-label="CLIX logo">
+      <span class="logo-mark" aria-hidden="true">✦</span>
+      <span class="logo-text">CLIX</span>
+    </div>
+
+    <div class="nav-center" id="navCenter">
+      <div class="global-counter" id="globalCounter">
+        <div class="counter-track" role="progressbar" aria-valuemin="0" aria-valuemax="3000" aria-valuenow="0" id="counterTrack">
+          <div class="counter-fill" id="counterFill"></div>
+        </div>
+        <span class="counter-label" id="counterLabel" aria-live="polite">— / 3,000 today</span>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <span class="quota-pill" id="quotaPill" style="display:none;" aria-live="polite">
+        <span class="quota-dot" aria-hidden="true"></span>
+        <span id="quotaNum">3</span> left today
+      </span>
+      <button class="theme-btn" id="themeToggle" aria-label="Toggle light/dark mode">
+        <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
+      <button class="btn-ghost nav-logout" id="logoutBtn" style="display:none;">Log out</button>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════════
+       SCREEN: HERO
+  ═══════════════════════════════════════════════════ -->
+  <section class="screen" id="screenHero">
+    <div class="hero-grid" aria-hidden="true"></div>
+    <div class="orb orb-cyan" aria-hidden="true"></div>
+    <div class="orb orb-gold" aria-hidden="true"></div>
+
+    <div class="hero-content">
+      <div class="hero-eyebrow" style="--d:0">
+        <span class="eyebrow-pulse" aria-hidden="true"></span>
+        FREE AI WEBSITE BUILDER — ENTERPRISE-GRADE AI ENGINE
+      </div>
+
+      <h1 class="hero-h1">
+        <span class="hero-line" style="--d:1">Build anything.</span>
+        <span class="hero-line hero-accent-line" style="--d:2">One <em>prompt.</em></span>
+      </h1>
+
+      <p class="hero-p" style="--d:3">
+        Describe your site. CLIX generates production-ready HTML, CSS &amp; JS
+        in seconds — powered by our advanced AI engine so you <em>never</em> hit a wall.
+      </p>
+
+      <div class="hero-cta" style="--d:4">
+        <button class="btn-primary btn-xl" id="heroGetStarted">
+          Start building free
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+        <p class="hero-note">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          No credit card &nbsp;·&nbsp; 3 free builds/day
+        </p>
+      </div>
+
+      <div class="hero-stats" style="--d:5">
+        <div class="stat"><span class="stat-n">⚡</span><span class="stat-l">Multi-model AI</span></div>
+        <div class="stat-sep" aria-hidden="true"></div>
+        <div class="stat"><span class="stat-n">3k</span><span class="stat-l">Daily builds</span></div>
+        <div class="stat-sep" aria-hidden="true"></div>
+        <div class="stat"><span class="stat-n">100%</span><span class="stat-l">Free forever</span></div>
+      </div>
+    </div>
+
+    <!-- Floating terminal preview -->
+    <div class="hero-terminal" aria-hidden="true">
+      <div class="terminal-bar">
+        <span class="t-dot t-red"></span>
+        <span class="t-dot t-yellow"></span>
+        <span class="t-dot t-green"></span>
+        <span class="terminal-name">clix-output.html</span>
+      </div>
+      <div class="terminal-body">
+        <div class="tl"><span class="tc-tag">&lt;!DOCTYPE html&gt;</span></div>
+        <div class="tl"><span class="tc-tag">&lt;html</span> <span class="tc-attr">lang</span>=<span class="tc-val">"en"</span><span class="tc-tag">&gt;</span></div>
+        <div class="tl tl-i1"><span class="tc-tag">&lt;head&gt;</span></div>
+        <div class="tl tl-i2"><span class="tc-comment">&lt;!-- ✦ Built with CLIX --&gt;</span></div>
+        <div class="tl tl-i2"><span class="tc-tag">&lt;title&gt;</span><span class="tc-text">My Portfolio</span><span class="tc-tag">&lt;/title&gt;</span></div>
+        <div class="tl tl-i1"><span class="tc-tag">&lt;/head&gt;</span></div>
+        <div class="tl tl-i1"><span class="tc-tag">&lt;body&gt;</span></div>
+        <div class="tl tl-i2"><span class="tc-tag">&lt;section</span> <span class="tc-attr">class</span>=<span class="tc-val">"hero"</span><span class="tc-tag">&gt;</span></div>
+        <div class="tl tl-i3"><span class="tc-tag">&lt;h1&gt;</span><span class="tc-text terminal-typing">Generating your site</span><span class="tc-cursor">▋</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════
+       SCREEN: AUTH
+  ═══════════════════════════════════════════════════ -->
+  <section class="screen" id="screenAuth" style="display:none;">
+    <div class="auth-bg" aria-hidden="true"></div>
+    <div class="auth-card">
+
+      <div class="auth-logo" aria-hidden="true">
+        <span class="logo-mark">✦</span>
+        <span class="logo-text">CLIX</span>
+      </div>
+
+      <!-- Step 1: Email -->
+      <div id="authStepEmail">
+        <h2 class="auth-h2">Welcome.</h2>
+        <p class="auth-sub">Enter your email to receive a sign-in code.</p>
+        <div class="field-group">
+          <label class="field-label" for="emailInput">Email address</label>
+          <input type="email" class="field" id="emailInput" placeholder="you@example.com" autocomplete="email" />
+        </div>
+        <div class="terms-row">
+          <input type="checkbox" class="terms-chk" id="termsChk" />
+          <label class="terms-lbl" for="termsChk">
+            I agree to the <a href="#" class="link">Terms of Use</a> and <a href="#" class="link">Privacy Policy</a>
+          </label>
+        </div>
+        <button class="btn-primary btn-full" id="sendOtpBtn">
+          Send code
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+        <div class="auth-err" id="emailErr" role="alert" style="display:none;"></div>
+      </div>
+
+      <!-- Step 2: OTP -->
+      <div id="authStepOtp" style="display:none;">
+        <h2 class="auth-h2">Check your inbox.</h2>
+        <p class="auth-sub">We sent a 6-digit code to <strong id="otpEmailShow"></strong></p>
+        <div class="otp-row" id="otpRow">
+          <input type="text" inputmode="numeric" maxlength="1" class="otp-cell" data-idx="0" aria-label="Digit 1" />
+          <input type="text" inputmode="numeric" maxlength="1" class="otp-cell" data-idx="1" aria-label="Digit 2" />
+          <input type="text" inputmode="numeric" maxlength="1" class="otp-cell" data-idx="2" aria-label="Digit 3" />
+          <input type="text" inputmode="numeric" maxlength="1" class="otp-cell" data-idx="3" aria-label="Digit 4" />
+          <input type="text" inputmode="numeric" maxlength="1" class="otp-cell" data-idx="4" aria-label="Digit 5" />
+          <input type="text" inputmode="numeric" maxlength="1" class="otp-cell" data-idx="5" aria-label="Digit 6" />
+        </div>
+        <div class="otp-meta">
+          <span class="otp-expire">Expires in <span id="otpCountdown">5:00</span></span>
+          <button class="btn-text" id="resendBtn">Resend code</button>
+        </div>
+        <button class="btn-primary btn-full" id="verifyOtpBtn">
+          Verify &amp; enter
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
+        <div class="auth-err" id="otpErr" role="alert" style="display:none;"></div>
+        <button class="btn-ghost btn-full auth-back" id="authBackBtn">← Back</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════
+       SCREEN: BUILDER
+  ═══════════════════════════════════════════════════ -->
+  <section class="screen screen-builder" id="screenBuilder" style="display:none;">
+
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+
+    <div class="builder-wrap">
+
+      <!-- SIDEBAR -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-inner">
+
+          <div class="sb-user">
+            <div class="sb-avatar" id="sbAvatar">?</div>
+            <div class="sb-userinfo">
+              <span class="sb-email" id="sbEmail">user@email.com</span>
+              <span class="sb-quota" id="sbQuota">3 builds left today</span>
+            </div>
+          </div>
+
+          <div class="sb-divider"></div>
+
+          <div class="sb-section">
+            <p class="sb-label">Site type</p>
+            <div class="type-grid" id="typeGrid">
+              <button class="type-btn active" data-type="landing"><span class="type-icon">🏠</span><span>Landing</span></button>
+              <button class="type-btn" data-type="portfolio"><span class="type-icon">🎨</span><span>Portfolio</span></button>
+              <button class="type-btn" data-type="blog"><span class="type-icon">📝</span><span>Blog</span></button>
+              <button class="type-btn" data-type="ecommerce"><span class="type-icon">🛒</span><span>Store</span></button>
+              <button class="type-btn" data-type="dashboard"><span class="type-icon">📊</span><span>Dashboard</span></button>
+              <button class="type-btn" data-type="custom"><span class="type-icon">⚡</span><span>Custom</span></button>
+            </div>
+          </div>
+
+          <div class="sb-divider"></div>
+
+          <div class="sb-section sb-hist-section">
+            <p class="sb-label">Build history</p>
+            <div class="history-list" id="historyList">
+              <div class="hist-empty" id="histEmpty">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span>No builds yet</span>
+                <span>Your history appears here</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sb-divider"></div>
+
+          <!-- ADSTERRA SIDEBAR AD (300x250) -->
+          <div class="sb-ad">
+            <div class="ad-placeholder">
+              <span class="ad-tag">Advertisement</span>
+              <!-- ═══════════════════════════════════
+                   INSERT ADSTERRA 300x250 SCRIPT HERE
+                   See integration tutorial below
+              ════════════════════════════════════ -->
+            </div>
+          </div>
+
+        </div>
+      </aside>
+
+      <!-- MAIN BUILDER AREA -->
+      <main class="builder-main">
+
+        <!-- Prompt card -->
+        <div class="prompt-card" id="promptCard">
+          <div class="prompt-header">
+            <h2 class="prompt-title">What are we building?</h2>
+            <div class="model-badge" id="modelBadge">
+              <span class="model-dot" aria-hidden="true"></span>
+              <span id="modelName">qwen3-coder</span>
+            </div>
+          </div>
+
+          <div class="prompt-box" id="promptBox">
+            <textarea
+              class="prompt-ta"
+              id="promptInput"
+              placeholder="A dark portfolio for a photographer named Zara. Full-screen hero image, smooth scroll, minimal nav, contact form..."
+              rows="4"
+              maxlength="1000"
+              aria-label="Describe your website"
+            ></textarea>
+            <div class="prompt-foot">
+              <span class="char-count" id="charCount">0 / 1000</span>
+              <button class="btn-ghost btn-xs" id="clearBtn">✕ Clear</button>
+            </div>
+          </div>
+
+          <div class="gate-notice" id="gateNotice">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Watch the short ad below to unlock your generation
+          </div>
+
+          <!-- Rewarded ad area -->
+          <div class="rewarded-wrap" id="rewardedWrap" style="display:none;">
+            <span class="rewarded-label">Sponsored · Watch to unlock</span>
+            <div class="rewarded-inner" id="rewardedContainer">
+              <span class="ad-placeholder-text">Ad loads here once activated</span>
+              <!-- DEV ONLY — remove in production -->
+              <button class="btn-ghost btn-xs dev-btn" id="devAdBtn">▶ Simulate ad complete (dev only)</button>
+            </div>
+          </div>
+
+          <button class="btn-generate" id="generateBtn" disabled>
+            <span class="gen-inner">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <span id="genBtnText">Generate website</span>
+            </span>
+            <span class="gen-glow" aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <!-- Progress card -->
+        <div class="progress-card" id="progressCard" style="display:none;">
+          <div class="prog-top">
+            <span class="prog-title">CLIX is building your site</span>
+            <span class="prog-model" id="progressModel">Using qwen3-coder</span>
+          </div>
+          <div class="prog-track">
+            <div class="prog-fill" id="progressFill"></div>
+          </div>
+          <div class="prog-steps">
+            <div class="p-step active" id="ps1"><span class="ps-dot"></span>Selecting AI model</div>
+            <div class="p-step" id="ps2"><span class="ps-dot"></span>Generating HTML structure</div>
+            <div class="p-step" id="ps3"><span class="ps-dot"></span>Writing CSS styles</div>
+            <div class="p-step" id="ps4"><span class="ps-dot"></span>Adding JavaScript</div>
+            <div class="p-step" id="ps5"><span class="ps-dot"></span>Finalising output</div>
+          </div>
+        </div>
+
+        <!-- Skeleton loader -->
+        <div class="skeleton-card" id="skeletonCard" style="display:none;" aria-hidden="true">
+          <div class="skel skel-title"></div>
+          <div class="skel skel-bar"></div>
+          <div class="skel skel-bar skel-short"></div>
+          <div class="skel skel-preview"></div>
+        </div>
+
+        <!-- Output card -->
+        <div class="output-card" id="outputCard" style="display:none;">
+          <div class="output-toolbar">
+            <div class="out-tabs">
+              <button class="out-tab active" id="tabPreviewBtn">Preview</button>
+              <button class="out-tab" id="tabCodeBtn">Code</button>
+            </div>
+            <div class="out-actions">
+              <button class="btn-ghost btn-xs" id="copyBtn">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+              <button class="btn-ghost btn-xs" id="shareBtn">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                Share
+              </button>
+              <button class="btn-primary btn-xs" id="downloadBtn">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download ZIP
+              </button>
+            </div>
+          </div>
+
+          <!-- Preview tab -->
+          <div class="out-panel" id="tabPreview">
+            <iframe class="preview-frame" id="previewFrame" sandbox="allow-scripts allow-same-origin" title="Generated website preview"></iframe>
+            <div class="preview-wm" aria-hidden="true">Built with CLIX ✦</div>
+          </div>
+
+          <!-- Code tab -->
+          <div class="out-panel" id="tabCode" style="display:none;">
+            <div class="code-viewer">
+              <div class="code-file-tabs">
+                <button class="cf-tab active" data-file="html">index.html</button>
+                <button class="cf-tab" data-file="css">style.css</button>
+                <button class="cf-tab" data-file="js">script.js</button>
+              </div>
+              <pre class="code-pre" id="codePre"><code id="codeContent"></code></pre>
+            </div>
+          </div>
+
+          <!-- Share modal -->
+          <div class="share-modal" id="shareModal" style="display:none;">
+            <div class="share-inner">
+              <h3 class="share-title">Share your build</h3>
+              <p class="share-sub">Show the world what you made with CLIX</p>
+              <div class="share-btns">
+                <a class="share-btn share-x" id="shareX" href="#" target="_blank" rel="noopener noreferrer">𝕏 Post on X</a>
+                <a class="share-btn share-wa" id="shareWa" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+                <a class="share-btn share-tg" id="shareTg" href="#" target="_blank" rel="noopener noreferrer">Telegram</a>
+              </div>
+              <button class="btn-ghost btn-full" id="shareClose">Close</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error card -->
+        <div class="error-card" id="errorCard" style="display:none;">
+          <div class="error-inner">
+            <div class="error-icon">⚠</div>
+            <h3 class="error-title">All models are resting.</h3>
+            <p class="error-msg" id="errorMsg">Every AI model hit its rate limit simultaneously. This is rare — try again in a few minutes.</p>
+            <button class="btn-primary" id="retryBtn">Try again</button>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </section>
+
+  <!-- ░░░ TOASTS ░░░ -->
+  <div class="toast-wrap" id="toastWrap" aria-live="polite" aria-atomic="false"></div>
+
+  <!-- ░░░ JSZIP ░░░ -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <!-- ░░░ MAIN SCRIPT ░░░ -->
+  <script type="module" src="script.js"></script>
+
+</body>
+</html>
