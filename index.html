@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CLIX — Build Any Website. One Prompt.</title>
+  <meta name="description" content="Type what you want. CLIX builds a complete, production-ready website in seconds. Free forever."/>
+  <meta property="og:title" content="CLIX — Build Any Website. One Prompt."/>
+  <meta property="og:description" content="Type what you want. CLIX builds it in seconds."/>
+  <meta property="og:type" content="website"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23080812'/><text y='75' x='50' text-anchor='middle' font-size='62' fill='%232eb9df'>✦</text></svg>"/>
+  <style>
+    :root{
+      --bg:#080812;--bg-card:#0d0d1a;--bg-hover:#111122;
+      --border:rgba(255,255,255,.07);--border-hi:rgba(46,185,223,.22);
+      --t1:#e8e8f0;--t2:#7878a0;--t3:#3a3a58;
+      --ac:#2eb9df;--ac-dim:rgba(46,185,223,.09);--ac-glow:rgba(46,185,223,.30);
+      --green:#1de9b0;--gold:#f5c842;
+      --fd:'Bricolage Grotesque',sans-serif;--fb:'Inter',sans-serif;--fm:'JetBrains Mono',monospace;
+      --nav-h:64px;--max-w:1140px;--r:12px;
+    }
+    [data-theme=light]{
+      --bg:#f5f5fb;--bg-card:#fff;--bg-hover:#eaeaf5;
+      --border:rgba(0,0,0,.08);--border-hi:rgba(26,127,196,.22);
+      --t1:#09090f;--t2:#50507a;--t3:#9898b8;
+      --ac:#1a7fc4;--ac-dim:rgba(26,127,196,.08);--ac-glow:rgba(26,127,196,.22);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:var(--fb);background:var(--bg);color:var(--t1);line-height:1.6;overflow-x:hidden;transition:background .3s,color .3s}
+    a{text-decoration:none;color:inherit}
+    button{cursor:pointer;font-family:var(--fb);background:none;border:none;color:inherit}
+    ::selection{background:var(--ac-dim);color:var(--ac)}
+
+    .bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;
+      background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+      background-size:72px 72px;
+      mask-image:radial-gradient(ellipse 80% 50% at 50% 0%,black 30%,transparent 80%)}
+    [data-theme=light] .bg-grid{background-image:linear-gradient(rgba(0,0,0,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.04) 1px,transparent 1px)}
+    .bg-glow{position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:900px;height:600px;
+      background:radial-gradient(ellipse,rgba(46,185,223,.08) 0%,transparent 65%);pointer-events:none;z-index:0}
+
+    /* NAV */
+    .nav{position:fixed;top:0;left:0;right:0;z-index:100;height:var(--nav-h);
+      display:flex;align-items:center;justify-content:space-between;padding:0 40px;
+      background:rgba(8,8,18,.82);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+    [data-theme=light] .nav{background:rgba(245,245,251,.88)}
+    .brand{display:flex;align-items:center;gap:10px}
+    .brand-icon{width:34px;height:34px;border-radius:8px;background:var(--ac);
+      display:flex;align-items:center;justify-content:center;
+      font-size:17px;color:#080812;font-weight:900;box-shadow:0 0 20px var(--ac-glow);flex-shrink:0}
+    .brand-name{font-family:var(--fd);font-size:20px;font-weight:800;letter-spacing:.07em}
+    .nav-links{display:flex;align-items:center;gap:4px}
+    .nav-link{padding:7px 16px;border-radius:8px;font-size:14px;font-weight:500;color:var(--t2);transition:color .15s,background .15s}
+    .nav-link:hover{color:var(--t1);background:var(--bg-hover)}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .btn-ghost{padding:8px 18px;border-radius:8px;font-size:14px;font-weight:500;color:var(--t2);transition:color .15s,background .15s}
+    .btn-ghost:hover{color:var(--t1);background:var(--bg-hover)}
+    .btn-solid{padding:9px 20px;border-radius:8px;font-size:14px;font-weight:600;background:var(--ac);color:#080812;transition:transform .15s,box-shadow .15s}
+    .btn-solid:hover{transform:translateY(-1px);box-shadow:0 8px 24px var(--ac-glow)}
+    .theme-btn{width:36px;height:36px;border-radius:50%;background:var(--bg-hover);border:1px solid var(--border);
+      display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--t2);transition:color .15s,transform .2s}
+    .theme-btn:hover{color:var(--t1);transform:rotate(20deg)}
+
+    /* HERO */
+    .hero{position:relative;z-index:1;min-height:100vh;padding-top:var(--nav-h);display:flex;align-items:center}
+    .hero-inner{max-width:var(--max-w);margin:0 auto;padding:80px 40px 100px;
+      display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;width:100%}
+    .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:5px 14px 5px 8px;
+      background:var(--ac-dim);border:1px solid var(--border-hi);border-radius:99px;
+      font-size:12px;font-weight:600;color:var(--ac);margin-bottom:28px;animation:fadeUp .6s both}
+    .badge-dot{width:18px;height:18px;border-radius:50%;background:var(--ac);
+      display:flex;align-items:center;justify-content:center;font-size:10px;color:#080812}
+    .hero-h1{font-family:var(--fd);font-size:clamp(40px,5vw,68px);font-weight:800;
+      line-height:1.06;letter-spacing:-.02em;margin-bottom:22px;animation:fadeUp .6s .08s both}
+    .hl{color:var(--ac);position:relative;display:inline}
+    .hl::after{content:'';position:absolute;left:0;bottom:4px;width:100%;height:32%;
+      background:var(--ac-dim);border-radius:4px;z-index:-1}
+    .hero-sub{font-size:17px;line-height:1.75;color:var(--t2);max-width:440px;
+      margin-bottom:36px;animation:fadeUp .6s .16s both}
+    .hero-btns{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+      margin-bottom:52px;animation:fadeUp .6s .22s both}
+    .btn-primary{display:inline-flex;align-items:center;gap:10px;padding:15px 28px;
+      background:var(--ac);color:#080812;border-radius:var(--r);
+      font-family:var(--fd);font-size:15px;font-weight:700;letter-spacing:.02em;
+      transition:transform .15s,box-shadow .15s;position:relative;overflow:hidden}
+    .btn-primary::after{content:'';position:absolute;inset:0;
+      background:linear-gradient(135deg,rgba(255,255,255,.2),transparent);opacity:0;transition:opacity .15s}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 40px var(--ac-glow)}
+    .btn-primary:hover::after{opacity:1}
+    .btn-primary svg{transition:transform .2s}
+    .btn-primary:hover svg{transform:translateX(3px)}
+    .btn-outline{display:inline-flex;align-items:center;gap:8px;padding:14px 22px;
+      background:transparent;color:var(--t1);border:1px solid var(--border);border-radius:var(--r);
+      font-size:15px;font-weight:500;transition:border-color .15s,background .15s}
+    .btn-outline:hover{border-color:var(--border-hi);background:var(--bg-hover)}
+    .hero-stats{display:flex;align-items:center;gap:24px;animation:fadeUp .6s .3s both}
+    .stat{display:flex;flex-direction:column;gap:2px}
+    .stat-n{font-family:var(--fd);font-size:26px;font-weight:800;line-height:1}
+    .stat-l{font-size:11px;font-weight:500;color:var(--t3);letter-spacing:.08em;text-transform:uppercase}
+    .stat-div{width:1px;height:36px;background:var(--border)}
+
+    /* DEMO WINDOW */
+    .hero-right{position:relative;animation:fadeUp .7s .2s both}
+    .demo-win{background:var(--bg-card);border:1px solid var(--border-hi);border-radius:16px;overflow:hidden;
+      box-shadow:0 0 0 1px rgba(46,185,223,.04),0 32px 80px rgba(0,0,0,.6)}
+    .demo-bar{display:flex;align-items:center;gap:7px;padding:12px 16px;
+      background:var(--bg-hover);border-bottom:1px solid var(--border)}
+    .wd{width:12px;height:12px;border-radius:50%}
+    .wd-r{background:#ff5f57}.wd-y{background:#ffbd2e}.wd-g{background:#28ca41}
+    .demo-title{font-family:var(--fm);font-size:12px;color:var(--t3);margin-left:8px;flex:1}
+    .demo-live{display:flex;align-items:center;gap:6px;font-family:var(--fm);font-size:11px;color:var(--green)}
+    .live-dot{width:6px;height:6px;background:var(--green);border-radius:50%;
+      animation:livePulse 1.5s ease-in-out infinite}
+    @keyframes livePulse{0%,100%{box-shadow:0 0 0 0 rgba(29,233,176,.4)}50%{box-shadow:0 0 0 5px transparent}}
+    .demo-body{padding:18px;font-family:var(--fm);font-size:12px;line-height:1.9;min-height:220px}
+    .dl{display:flex;gap:14px}
+    .ln{color:var(--t3);min-width:20px;text-align:right;user-select:none;font-size:11px}
+    .kw{color:#c792ea}.fn{color:#82aaff}.st{color:#c3e88d}
+    .tg{color:#89ddff}.at{color:#ffcb6b}.cm{color:#546e7a;font-style:italic}
+    .caret{display:inline-block;width:2px;height:13px;background:var(--ac);
+      vertical-align:middle;margin-left:1px;animation:caret 1s step-end infinite}
+    @keyframes caret{0%,100%{opacity:1}50%{opacity:0}}
+    .demo-foot{display:flex;align-items:center;justify-content:space-between;
+      padding:8px 16px;background:var(--bg-hover);border-top:1px solid var(--border)}
+    .df{display:flex;gap:12px}
+    .dfi{font-family:var(--fm);font-size:11px;color:var(--t3)}
+    .dfi.hi{color:var(--ac)}
+    .fc{position:absolute;background:var(--bg-card);border:1px solid var(--border-hi);
+      border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;
+      box-shadow:0 12px 36px rgba(0,0,0,.4);white-space:nowrap}
+    .fc-1{top:-18px;right:-14px;animation:fcf 4s ease-in-out infinite}
+    .fc-2{bottom:-18px;left:-14px;animation:fcf 5s 1.5s ease-in-out infinite}
+    @keyframes fcf{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+    .fci{font-size:20px}
+    .fct{font-size:12px;font-weight:600;color:var(--t1);display:block}
+    .fcs{font-size:11px;color:var(--t3);display:block}
+
+    /* SECTIONS */
+    .sec{position:relative;z-index:1;max-width:var(--max-w);margin:0 auto;padding:100px 40px}
+    .sec-eye{font-family:var(--fm);font-size:11px;font-weight:500;color:var(--ac);
+      letter-spacing:.16em;text-transform:uppercase;margin-bottom:14px}
+    .sec-h2{font-family:var(--fd);font-size:clamp(28px,4vw,44px);font-weight:800;
+      line-height:1.1;letter-spacing:-.02em;margin-bottom:56px;max-width:480px}
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+    .step{background:var(--bg-card);border:1px solid var(--border);padding:34px 28px;
+      position:relative;overflow:hidden;transition:border-color .2s,background .2s}
+    .step:first-child{border-radius:var(--r) 0 0 var(--r)}
+    .step:last-child{border-radius:0 var(--r) var(--r) 0}
+    .step:hover{background:var(--bg-hover);border-color:var(--border-hi)}
+    .step::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+      background:linear-gradient(90deg,var(--ac),#7c6af7);opacity:0;transition:opacity .2s}
+    .step:hover::before{opacity:1}
+    .step-num{font-family:var(--fm);font-size:11px;color:var(--ac);letter-spacing:.12em;margin-bottom:18px}
+    .step-ico{font-size:30px;margin-bottom:16px}
+    .step-title{font-family:var(--fd);font-size:19px;font-weight:700;margin-bottom:10px}
+    .step-desc{font-size:14px;line-height:1.7;color:var(--t2)}
+    .feats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .feat{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);
+      padding:26px;transition:border-color .2s,transform .2s,box-shadow .2s}
+    .feat:hover{border-color:var(--border-hi);transform:translateY(-3px);box-shadow:0 16px 48px rgba(0,0,0,.3)}
+    .feat-ico{width:42px;height:42px;border-radius:9px;background:var(--ac-dim);
+      border:1px solid var(--border-hi);display:flex;align-items:center;justify-content:center;
+      font-size:20px;margin-bottom:16px}
+    .feat-title{font-family:var(--fd);font-size:17px;font-weight:700;margin-bottom:8px}
+    .feat-desc{font-size:14px;line-height:1.7;color:var(--t2)}
+
+    /* CTA */
+    .cta-wrap{position:relative;z-index:1;padding:60px 40px 120px}
+    .cta-box{max-width:680px;margin:0 auto;background:var(--bg-card);
+      border:1px solid var(--border-hi);border-radius:24px;padding:70px 60px;text-align:center;
+      position:relative;overflow:hidden}
+    .cta-box::before{content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);
+      width:500px;height:300px;background:radial-gradient(ellipse,rgba(46,185,223,.12) 0%,transparent 70%);pointer-events:none}
+    .cta-h2{font-family:var(--fd);font-size:clamp(26px,4vw,40px);font-weight:800;
+      line-height:1.1;letter-spacing:-.02em;margin-bottom:14px}
+    .cta-sub{font-size:16px;color:var(--t2);line-height:1.7;max-width:460px;margin:0 auto 34px}
+    .cta-note{font-size:13px;color:var(--t3);margin-top:20px}
+
+    /* FOOTER */
+    .footer{position:relative;z-index:1;border-top:1px solid var(--border);
+      padding:28px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+    .foot-brand{display:flex;align-items:center;gap:9px}
+    .foot-icon{width:26px;height:26px;border-radius:6px;background:var(--ac);
+      display:flex;align-items:center;justify-content:center;font-size:13px;color:#080812;font-weight:900}
+    .foot-name{font-family:var(--fd);font-size:16px;font-weight:800;letter-spacing:.07em}
+    .foot-copy{font-size:13px;color:var(--t3)}
+    .foot-links{display:flex;gap:20px}
+    .foot-link{font-size:13px;color:var(--t2);transition:color .15s}
+    .foot-link:hover{color:var(--t1)}
+
+    /* CAP BANNER */
+    .cap-banner{display:none;position:fixed;top:var(--nav-h);left:0;right:0;z-index:90;
+      padding:11px 40px;text-align:center;background:rgba(245,200,66,.10);
+      border-bottom:1px solid rgba(245,200,66,.22);font-size:14px;font-weight:500;color:var(--gold)}
+    .cap-banner.show{display:block}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+
+    @media(max-width:1024px){
+      .hero-inner{grid-template-columns:1fr;gap:0}
+      .hero-right{display:none}
+      .steps,.feats{grid-template-columns:1fr;gap:12px}
+      .step:first-child{border-radius:var(--r) var(--r) 0 0}
+      .step:last-child{border-radius:0 0 var(--r) var(--r)}
+    }
+    @media(max-width:768px){
+      .nav{padding:0 20px}.nav-links{display:none}
+      .hero-inner{padding:48px 20px 72px}
+      .sec,.cta-wrap{padding-left:20px;padding-right:20px}
+      .cta-box{padding:44px 24px}.footer{padding:24px 20px}
+      .hero-btns{flex-direction:column;align-items:flex-start}
+      .btn-primary,.btn-outline{width:100%;justify-content:center}
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow" aria-hidden="true"></div>
+  <div class="cap-banner" id="capBanner">⚡ CLIX has served 3,000 builds today — resets at midnight. <strong id="capTimer"></strong></div>
+
+  <nav class="nav">
+    <a href="index.html" class="brand">
+      <div class="brand-icon">✦</div>
+      <span class="brand-name">CLIX</span>
+    </a>
+    <div class="nav-links">
+      <a href="#how-it-works" class="nav-link">How it works</a>
+      <a href="#features" class="nav-link">Features</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-btn" id="themeBtn">🌙</button>
+      <a href="signup.html" class="btn-ghost">Sign in</a>
+      <a href="signup.html" class="btn-solid">Start building →</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <div>
+        <div class="hero-badge"><span class="badge-dot">✦</span>Free — No credit card required</div>
+        <h1 class="hero-h1">Build any website.<br><span class="hl">One prompt.</span></h1>
+        <p class="hero-sub">Describe what you want. CLIX generates a complete, production-ready website — HTML, CSS and JavaScript — in seconds. Watch it build live. Download. Ship.</p>
+        <div class="hero-btns">
+          <a href="signup.html" class="btn-primary">
+            Start building free
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+          <a href="#how-it-works" class="btn-outline">See how it works</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat"><span class="stat-n" id="todayCount">—</span><span class="stat-l">Built today</span></div>
+          <div class="stat-div"></div>
+          <div class="stat"><span class="stat-n">3</span><span class="stat-l">Free/day</span></div>
+          <div class="stat-div"></div>
+          <div class="stat"><span class="stat-n">∞</span><span class="stat-l">Possibilities</span></div>
+        </div>
+      </div>
+      <div class="hero-right">
+        <div class="demo-win">
+          <div class="demo-bar">
+            <span class="wd wd-r"></span><span class="wd wd-y"></span><span class="wd wd-g"></span>
+            <span class="demo-title">clix — index.html</span>
+            <div class="demo-live"><span class="live-dot"></span>LIVE</div>
+          </div>
+          <div class="demo-body" id="demoBody">
+            <div class="dl"><span class="ln">1</span><span><span class="tg">&lt;!DOCTYPE</span> <span class="fn">html</span><span class="tg">&gt;</span></span></div>
+            <div class="dl"><span class="ln">2</span><span><span class="tg">&lt;html</span> <span class="at">lang</span>=<span class="st">"en"</span><span class="tg">&gt;</span></span></div>
+            <div class="dl"><span class="ln">3</span><span><span class="tg">&nbsp;&nbsp;&lt;head&gt;</span></span></div>
+            <div class="dl"><span class="ln">4</span><span><span class="cm">&nbsp;&nbsp;&nbsp;&nbsp;&lt;!-- ✦ Built with CLIX --&gt;</span></span></div>
+            <div class="dl"><span class="ln">5</span><span><span class="tg">&nbsp;&nbsp;&nbsp;&nbsp;&lt;title&gt;</span><span class="st">Zara Photography</span><span class="tg">&lt;/title&gt;</span></span></div>
+            <div class="dl"><span class="ln">6</span><span><span class="tg">&nbsp;&nbsp;&lt;/head&gt;</span></span></div>
+            <div class="dl"><span class="ln">7</span><span><span class="tg">&nbsp;&nbsp;&lt;body&gt;</span></span></div>
+            <div class="dl"><span class="ln">8</span><span><span class="tg">&nbsp;&nbsp;&nbsp;&nbsp;&lt;nav</span> <span class="at">class</span>=<span class="st">"navbar"</span><span class="tg">&gt;</span></span></div>
+            <div class="dl"><span class="ln">9</span><span><span class="tg">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;h1&gt;</span><span class="st">Zara.</span><span class="tg">&lt;/h1&gt;</span><span class="caret"></span></span></div>
+          </div>
+          <div class="demo-foot">
+            <div class="df">
+              <span class="dfi">HTML</span><span class="dfi">UTF-8</span><span class="dfi">Ln 9</span>
+            </div>
+            <span class="dfi hi">● Generating...</span>
+          </div>
+        </div>
+        <div class="fc fc-1"><span class="fci">⚡</span><div><span class="fct">Done in 4.2s</span><span class="fcs">Full HTML+CSS+JS</span></div></div>
+        <div class="fc fc-2"><span class="fci">📦</span><div><span class="fct">Download ready</span><span class="fcs">One clean file</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how-it-works">
+    <div class="sec">
+      <p class="sec-eye">// HOW IT WORKS</p>
+      <h2 class="sec-h2">Three steps.<br>One website.</h2>
+      <div class="steps">
+        <div class="step"><p class="step-num">STEP 01</p><div class="step-ico">✍️</div><h3 class="step-title">Describe your site</h3><p class="step-desc">Type what you want in plain English. "A dark portfolio for a photographer" is all you need to start.</p></div>
+        <div class="step"><p class="step-num">STEP 02</p><div class="step-ico">⚡</div><h3 class="step-title">Watch it build live</h3><p class="step-desc">CLIX streams code in real time. Watch HTML, CSS and JavaScript appear line by line with a live preview updating as it builds.</p></div>
+        <div class="step"><p class="step-num">STEP 03</p><div class="step-ico">🚀</div><h3 class="step-title">Download and ship</h3><p class="step-desc">Download one complete file. Every build is saved to your history so you never lose anything.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="sec" style="padding-top:0">
+      <p class="sec-eye">// FEATURES</p>
+      <h2 class="sec-h2">Everything you need.</h2>
+      <div class="feats">
+        <div class="feat"><div class="feat-ico">🎨</div><h3 class="feat-title">Complete code</h3><p class="feat-desc">One clean HTML file with CSS and JS inside. No separate files. No broken links. Just open it and it works.</p></div>
+        <div class="feat"><div class="feat-ico">👁</div><h3 class="feat-title">Live preview</h3><p class="feat-desc">See your website render in real time while CLIX generates it. Code on the left, live site on the right.</p></div>
+        <div class="feat"><div class="feat-ico">📦</div><h3 class="feat-title">Download ZIP</h3><p class="feat-desc">Download your complete site as a ZIP file, ready to upload to any host.</p></div>
+        <div class="feat"><div class="feat-ico">🕒</div><h3 class="feat-title">Build history</h3><p class="feat-desc">Every build saved automatically. Come back and reload any previous creation in one tap.</p></div>
+        <div class="feat"><div class="feat-ico">🔄</div><h3 class="feat-title">Smart fallback</h3><p class="feat-desc">Multiple AI models in sequence. If one is busy, the next takes over — so you always get a result.</p></div>
+        <div class="feat"><div class="feat-ico">🆓</div><h3 class="feat-title">Free forever</h3><p class="feat-desc">3 builds per day, completely free. No credit card. No watermarks on your code.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="cta-wrap">
+    <div class="cta-box">
+      <h2 class="cta-h2">Ready to build something?</h2>
+      <p class="cta-sub">Join CLIX today. Create websites in seconds, completely free.</p>
+      <a href="signup.html" class="btn-primary" style="display:inline-flex">
+        Create free account
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+      <p class="cta-note">No credit card · 3 free builds every day</p>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="foot-brand">
+      <div class="foot-icon">✦</div>
+      <span class="foot-name">CLIX</span>
+    </div>
+    <span class="foot-copy">© 2026 CLIX. All rights reserved.</span>
+    <div class="foot-links">
+      <a href="#" class="foot-link">Privacy</a>
+      <a href="#" class="foot-link">Terms</a>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+    const sb = createClient('https://kikimirbzsnlcydzjdco.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtpa2ltaXJienNubGN5ZHpqZGNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDcxOTgsImV4cCI6MjA4OTc4MzE5OH0.Q8Qm2_v2-1OycwjLJRBNBgAFNSlP7i3ZJtiq1qrfdtI');
+
+    // Theme
+    const html=document.documentElement;
+    const tb=document.getElementById('themeBtn');
+    const applyTheme=t=>{html.setAttribute('data-theme',t);localStorage.setItem('clix-theme',t);tb.textContent=t==='dark'?'🌙':'☀️'};
+    applyTheme(localStorage.getItem('clix-theme')||'dark');
+    tb.addEventListener('click',()=>applyTheme(html.getAttribute('data-theme')==='dark'?'light':'dark'));
+
+    // If already logged in redirect to builder
+    const {data:{session}}=await sb.auth.getSession();
+    if(session?.user){
+      document.querySelectorAll('[href="signup.html"]').forEach(el=>{
+        if(el.textContent.includes('building')||el.textContent.includes('free account')){el.href='builder.html'}
+      });
+    }
+
+    // Load counter
+    try{
+      const {data}=await sb.from('global_stats').select('daily_count,last_reset').eq('id',1).single();
+      if(data){
+        const isNew=new Date().toDateString()!==new Date(data.last_reset).toDateString();
+        const count=isNew?0:data.daily_count||0;
+        document.getElementById('todayCount').textContent=count.toLocaleString();
+        if(count>=3000){
+          document.getElementById('capBanner').classList.add('show');
+          const tick=()=>{const now=new Date(),mid=new Date();mid.setHours(24,0,0,0);const d=Math.max(0,mid-now);document.getElementById('capTimer').textContent=`Resets in ${String(Math.floor(d/3600000)).padStart(2,'0')}:${String(Math.floor(d%3600000/60000)).padStart(2,'0')}:${String(Math.floor(d%60000/1000)).padStart(2,'0')}`};
+          tick();setInterval(tick,1000);
+        }
+      }
+    }catch(e){}
+
+    // Animate demo lines
+    const lines=[
+      `<div class="dl"><span class="ln">10</span><span><span class="tg">&nbsp;&nbsp;&nbsp;&nbsp;&lt;/nav&gt;</span></span></div>`,
+      `<div class="dl"><span class="ln">11</span><span><span class="tg">&nbsp;&nbsp;&nbsp;&nbsp;&lt;section</span> <span class="at">class</span>=<span class="st">"hero"</span><span class="tg">&gt;</span></span></div>`,
+      `<div class="dl"><span class="ln">12</span><span><span class="tg">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;h1&gt;</span><span class="st">Capturing light.</span><span class="tg">&lt;/h1&gt;</span></span></div>`,
+      `<div class="dl"><span class="ln">13</span><span><span class="tg">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;p&gt;</span><span class="st">Photography by Zara.</span><span class="tg">&lt;/p&gt;</span></span></div>`,
+    ];
+    const db=document.getElementById('demoBody');
+    let li=0;
+    setInterval(()=>{
+      if(li<lines.length){db.querySelectorAll('.caret').forEach(c=>c.remove());db.insertAdjacentHTML('beforeend',lines[li++]);db.scrollTop=db.scrollHeight;}
+    },2000);
+  </script>
+</body>
+</html>

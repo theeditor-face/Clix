@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Create Account — CLIX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23080812'/><text y='75' x='50' text-anchor='middle' font-size='62' fill='%232eb9df'>✦</text></svg>"/>
+  <style>
+    :root{--bg:#080812;--bg-card:#0d0d1a;--bg-hover:#111122;--bg-input:#0a0a16;--border:rgba(255,255,255,.07);--border-hi:rgba(46,185,223,.22);--t1:#e8e8f0;--t2:#7878a0;--t3:#3a3a58;--ac:#2eb9df;--ac-dim:rgba(46,185,223,.09);--ac-glow:rgba(46,185,223,.30);--red:#f7516a;--red-dim:rgba(247,81,106,.10);--green:#1de9b0;--fd:'Bricolage Grotesque',sans-serif;--fb:'Inter',sans-serif;--r:10px}
+    [data-theme=light]{--bg:#f5f5fb;--bg-card:#fff;--bg-hover:#eaeaf5;--bg-input:#f0f0fa;--border:rgba(0,0,0,.08);--border-hi:rgba(26,127,196,.22);--t1:#09090f;--t2:#50507a;--t3:#9898b8;--ac:#1a7fc4;--ac-dim:rgba(26,127,196,.08);--ac-glow:rgba(26,127,196,.22)}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh;display:flex;flex-direction:column;transition:background .3s,color .3s}
+    a{text-decoration:none;color:inherit}
+    button{cursor:pointer;font-family:var(--fb);background:none;border:none;color:inherit}
+    ::selection{background:var(--ac-dim);color:var(--ac)}
+    .bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:68px 68px}
+    [data-theme=light] .bg-grid{background-image:linear-gradient(rgba(0,0,0,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.04) 1px,transparent 1px)}
+    .topbar{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:18px 40px}
+    .brand{display:flex;align-items:center;gap:10px}
+    .brand-icon{width:32px;height:32px;border-radius:8px;background:var(--ac);display:flex;align-items:center;justify-content:center;font-size:16px;color:#080812;font-weight:900;box-shadow:0 0 16px var(--ac-glow)}
+    .brand-name{font-family:var(--fd);font-size:19px;font-weight:800;letter-spacing:.07em}
+    .theme-btn{width:34px;height:34px;border-radius:50%;background:var(--bg-hover);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--t2);transition:color .15s,transform .2s}
+    .theme-btn:hover{color:var(--t1);transform:rotate(20deg)}
+    .main{position:relative;z-index:1;flex:1;display:flex;align-items:center;justify-content:center;padding:30px 20px 70px}
+    .container{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;max-width:940px;width:100%}
+    .left-title{font-family:var(--fd);font-size:clamp(30px,4vw,50px);font-weight:800;line-height:1.1;letter-spacing:-.02em;margin-bottom:16px}
+    .hl{color:var(--ac)}
+    .left-sub{font-size:16px;line-height:1.75;color:var(--t2);margin-bottom:32px}
+    .perks{display:flex;flex-direction:column;gap:14px}
+    .perk{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--t2)}
+    .perk-icon{width:32px;height:32px;border-radius:8px;background:var(--ac-dim);border:1px solid var(--border-hi);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+    .perk strong{color:var(--t1)}
+    .card{background:var(--bg-card);border:1px solid var(--border);border-radius:18px;padding:38px 34px;box-shadow:0 20px 70px rgba(0,0,0,.4);position:relative;overflow:hidden}
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--ac),#7c6af7)}
+    .card-title{font-family:var(--fd);font-size:22px;font-weight:800;margin-bottom:6px}
+    .card-sub{font-size:14px;color:var(--t2);margin-bottom:26px}
+    .form{display:flex;flex-direction:column;gap:16px}
+    .fgroup{display:flex;flex-direction:column;gap:6px}
+    .flabel{font-size:13px;font-weight:600;color:var(--t2)}
+    .flabel span{color:var(--red)}
+    .fwrap{position:relative}
+    .ficon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--t3);pointer-events:none;display:flex;align-items:center}
+    .field{width:100%;padding:12px 14px 12px 40px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r);color:var(--t1);font-size:15px;font-family:var(--fb);outline:none;transition:border-color .15s,box-shadow .15s}
+    .field::placeholder{color:var(--t3)}
+    .field:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--ac-dim)}
+    .field.err{border-color:var(--red);box-shadow:0 0 0 3px var(--red-dim)}
+    .pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--t3);font-size:16px;padding:4px;transition:color .15s}
+    .pw-toggle:hover{color:var(--t2)}
+    .pw-strength{display:flex;gap:4px;margin-top:6px}
+    .pw-bar{flex:1;height:3px;background:var(--border);border-radius:99px;transition:background .2s}
+    .pw-bar.weak{background:var(--red)}.pw-bar.fair{background:#f5c842}.pw-bar.good{background:var(--green)}
+    .pw-hint{font-size:11px;color:var(--t3);margin-top:4px}
+    .terms-row{display:flex;align-items:flex-start;gap:10px}
+    .terms-chk{width:15px;height:15px;accent-color:var(--ac);margin-top:2px;flex-shrink:0;cursor:pointer}
+    .terms-lbl{font-size:13px;color:var(--t2);line-height:1.5}
+    .terms-lbl a{color:var(--ac)}
+    .form-err{display:none;padding:11px 13px;background:var(--red-dim);border:1px solid rgba(247,81,106,.22);border-radius:var(--r);font-size:13px;color:var(--red);line-height:1.5}
+    .form-err.show{display:block}
+    .btn-submit{width:100%;padding:14px;background:var(--ac);color:#080812;border-radius:var(--r);font-family:var(--fd);font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .15s,box-shadow .15s,opacity .15s;position:relative;overflow:hidden}
+    .btn-submit::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.18),transparent);opacity:0;transition:opacity .15s}
+    .btn-submit:hover{transform:translateY(-2px);box-shadow:0 12px 36px var(--ac-glow)}
+    .btn-submit:hover::after{opacity:1}
+    .btn-submit:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+    .spinner{width:17px;height:17px;border:2px solid rgba(8,8,18,.3);border-top-color:#080812;border-radius:50%;animation:spin .7s linear infinite;display:none}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .switch-link{text-align:center;font-size:13px;color:var(--t2);margin-top:18px}
+    .switch-link button{color:var(--ac);font-weight:600;font-size:13px;text-decoration:underline}
+    /* Already logged in notice */
+    .already-in{display:none;margin-top:16px;padding:13px 15px;background:var(--ac-dim);border:1px solid var(--border-hi);border-radius:var(--r);font-size:13px;color:var(--t2);text-align:center;line-height:1.7}
+    .already-in a{color:var(--ac);font-weight:600}
+    .already-in button{color:var(--red);font-weight:600;font-size:13px;text-decoration:underline;margin-left:4px}
+    @media(max-width:768px){.container{grid-template-columns:1fr}.left-side{display:none}.topbar{padding:16px 20px}}
+    @media(max-width:480px){.card{padding:28px 18px}}
+  </style>
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="topbar">
+    <a href="index.html" class="brand">
+      <div class="brand-icon">✦</div>
+      <span class="brand-name">CLIX</span>
+    </a>
+    <button class="theme-btn" id="themeBtn">🌙</button>
+  </div>
+  <main class="main">
+    <div class="container">
+      <div class="left-side">
+        <h1 class="left-title">The fastest way to<br><span class="hl">build a website.</span></h1>
+        <p class="left-sub">Create your free account and start generating complete websites in seconds.</p>
+        <div class="perks">
+          <div class="perk"><div class="perk-icon">⚡</div><div><strong>3 free builds every day</strong> — resets at midnight</div></div>
+          <div class="perk"><div class="perk-icon">👁</div><div><strong>Live code streaming</strong> — watch it build in real time</div></div>
+          <div class="perk"><div class="perk-icon">📦</div><div><strong>One complete file</strong> — CSS and JS embedded inside</div></div>
+          <div class="perk"><div class="perk-icon">🕒</div><div><strong>Full history</strong> — every build saved automatically</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2 class="card-title" id="cardTitle">Create your account</h2>
+        <p class="card-sub" id="cardSub">Get started in under a minute.</p>
+        <form class="form" id="authForm" novalidate>
+          <div class="fgroup" id="nameGroup">
+            <label class="flabel" for="nameInput">Full name <span>*</span></label>
+            <div class="fwrap">
+              <span class="ficon"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+              <input type="text" class="field" id="nameInput" placeholder="Your full name" autocomplete="name"/>
+            </div>
+          </div>
+          <div class="fgroup">
+            <label class="flabel" for="emailInput">Email address <span>*</span></label>
+            <div class="fwrap">
+              <span class="ficon"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg></span>
+              <input type="email" class="field" id="emailInput" placeholder="you@example.com" autocomplete="email"/>
+            </div>
+          </div>
+          <div class="fgroup">
+            <label class="flabel" for="pwInput">Password <span>*</span></label>
+            <div class="fwrap">
+              <span class="ficon"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+              <input type="password" class="field" id="pwInput" placeholder="Create a strong password" autocomplete="new-password"/>
+              <button type="button" class="pw-toggle" id="pwToggle">👁</button>
+            </div>
+            <div id="strengthWrap">
+              <div class="pw-strength"><div class="pw-bar" id="b1"></div><div class="pw-bar" id="b2"></div><div class="pw-bar" id="b3"></div><div class="pw-bar" id="b4"></div></div>
+              <p class="pw-hint" id="pwHint">Minimum 8 characters</p>
+            </div>
+          </div>
+          <div class="terms-row" id="termsRow">
+            <input type="checkbox" class="terms-chk" id="termsChk"/>
+            <label class="terms-lbl" for="termsChk">I agree to the <a href="#">Terms of Use</a> and <a href="#">Privacy Policy</a></label>
+          </div>
+          <div class="form-err" id="formErr"></div>
+          <button type="submit" class="btn-submit" id="submitBtn">
+            <div class="spinner" id="spinner"></div>
+            <span id="submitTxt">Create account</span>
+            <svg id="submitArrow" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+        </form>
+        <p class="switch-link"><span id="switchLabel">Already have an account?</span> <button id="switchBtn">Sign in instead</button></p>
+        <!-- Shown if already logged in — does NOT auto-redirect -->
+        <div class="already-in" id="alreadyIn">
+          You're already signed in. <a href="builder.html">Go to builder →</a> or <button id="signOutBtn">sign out to switch accounts</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    // persistSession: true (default) — keeps user logged in across tabs
+    // This is correct — we just no longer auto-redirect on signup page
+    const sb = createClient(
+      'https://kikimirbzsnlcydzjdco.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtpa2ltaXJienNubGN5ZHpqZGNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDcxOTgsImV4cCI6MjA4OTc4MzE5OH0.Q8Qm2_v2-1OycwjLJRBNBgAFNSlP7i3ZJtiq1qrfdtI'
+    );
+
+    // Theme
+    const html=document.documentElement;
+    const tb=document.getElementById('themeBtn');
+    const applyTheme=t=>{html.setAttribute('data-theme',t);localStorage.setItem('clix-theme',t);tb.textContent=t==='dark'?'🌙':'☀️'};
+    applyTheme(localStorage.getItem('clix-theme')||'dark');
+    tb.addEventListener('click',()=>applyTheme(html.getAttribute('data-theme')==='dark'?'light':'dark'));
+
+    // ── KEY FIX: Check if already logged in but DO NOT auto-redirect ──
+    // Instead show a notice so users can choose to go to builder
+    // or sign out and create a new account
+    // This prevents session hijacking of new users
+    const {data:{session}}=await sb.auth.getSession();
+    if(session?.user){
+      document.getElementById('alreadyIn').style.display='block';
+    }
+
+    // Sign out existing user if they want to switch accounts
+    document.getElementById('signOutBtn').addEventListener('click',async()=>{
+      await sb.auth.signOut();
+      localStorage.removeItem('sb-kikimirbzsnlcydzjdco-auth-token');
+      document.getElementById('alreadyIn').style.display='none';
+      window.location.reload();
+    });
+
+    // Switch signup / signin
+    let isSignIn=false;
+    document.getElementById('switchBtn').addEventListener('click',()=>{
+      isSignIn=!isSignIn;
+      document.getElementById('cardTitle').textContent=isSignIn?'Welcome back':'Create your account';
+      document.getElementById('cardSub').textContent=isSignIn?'Sign in to your CLIX account.':'Get started in under a minute.';
+      document.getElementById('nameGroup').style.display=isSignIn?'none':'';
+      document.getElementById('strengthWrap').style.display=isSignIn?'none':'';
+      document.getElementById('termsRow').style.display=isSignIn?'none':'';
+      document.getElementById('submitTxt').textContent=isSignIn?'Sign in':'Create account';
+      document.getElementById('pwInput').placeholder=isSignIn?'Your password':'Create a strong password';
+      document.getElementById('pwInput').autocomplete=isSignIn?'current-password':'new-password';
+      document.getElementById('switchBtn').textContent=isSignIn?'Create account instead':'Sign in instead';
+      document.getElementById('switchLabel').textContent=isSignIn?"Don't have an account?":'Already have an account?';
+      document.getElementById('formErr').classList.remove('show');
+    });
+
+    // Password strength
+    const pwInput=document.getElementById('pwInput');
+    const bars=[document.getElementById('b1'),document.getElementById('b2'),document.getElementById('b3'),document.getElementById('b4')];
+    const pwHint=document.getElementById('pwHint');
+    pwInput.addEventListener('input',()=>{
+      if(isSignIn)return;
+      const v=pwInput.value;
+      let s=0;
+      if(v.length>=8)s++;if(v.length>=12)s++;
+      if(/[A-Z]/.test(v)&&/[0-9]/.test(v))s++;
+      if(/[^A-Za-z0-9]/.test(v))s++;
+      bars.forEach((b,i)=>{b.className='pw-bar';if(i<s)b.classList.add(s<=1?'weak':s<=2?'fair':'good')});
+      pwHint.textContent=v.length===0?'Minimum 8 characters':s<=1?'Weak — add more characters':s<=2?'Fair — add numbers and capitals':s<=3?'Good password':'Strong password ✓';
+    });
+    document.getElementById('pwToggle').addEventListener('click',()=>{pwInput.type=pwInput.type==='password'?'text':'password'});
+
+    // Form submit
+    const formErr=document.getElementById('formErr');
+    const submitBtn=document.getElementById('submitBtn');
+    const spinner=document.getElementById('spinner');
+    const submitArrow=document.getElementById('submitArrow');
+    function showErr(msg){formErr.textContent=msg;formErr.classList.add('show')}
+    function hideErr(){formErr.classList.remove('show')}
+    function setLoading(on){submitBtn.disabled=on;spinner.style.display=on?'block':'none';submitArrow.style.display=on?'none':'';document.getElementById('submitTxt').textContent=on?(isSignIn?'Signing in...':'Creating account...'):(isSignIn?'Sign in':'Create account')}
+
+    document.getElementById('authForm').addEventListener('submit',async e=>{
+      e.preventDefault();hideErr();
+      const name=document.getElementById('nameInput').value.trim();
+      const email=document.getElementById('emailInput').value.trim().toLowerCase();
+      const pw=pwInput.value;
+      if(!isSignIn&&!name){showErr('Please enter your full name.');return}
+      if(!email||!/\S+@\S+\.\S+/.test(email)){showErr('Please enter a valid email address.');return}
+      if(!pw){showErr('Please enter a password.');return}
+      if(!isSignIn&&pw.length<8){showErr('Password must be at least 8 characters.');return}
+      if(!isSignIn&&!document.getElementById('termsChk').checked){showErr('Please accept the Terms of Use.');return}
+      setLoading(true);
+      try{
+        if(isSignIn){
+          // Sign in with password
+          const {data,error}=await sb.auth.signInWithPassword({email,password:pw});
+          if(error)throw error;
+          // Verify user server-side immediately
+          const {data:{user},error:vErr}=await sb.auth.getUser();
+          if(vErr||!user)throw new Error('Authentication failed.');
+          window.location.href='builder.html';
+        }else{
+          // Sign up — sends OTP verification email
+          const {error}=await sb.auth.signUp({
+            email,password:pw,
+            options:{data:{full_name:name},emailRedirectTo:window.location.origin+'/verify.html'}
+          });
+          if(error)throw error;
+          sessionStorage.setItem('clix-verify-email',email);
+          sessionStorage.setItem('clix-verify-name',name);
+          window.location.href='verify.html';
+        }
+      }catch(err){
+        let msg=err.message||'Something went wrong.';
+        if(msg.includes('already registered'))msg='An account with this email already exists. Sign in instead.';
+        if(msg.includes('Invalid login')||msg.includes('Invalid email'))msg='Incorrect email or password.';
+        if(msg.includes('weak password'))msg='Password too weak. Use 8+ characters with numbers and letters.';
+        showErr(msg);setLoading(false);
+      }
+    });
+  </script>
+</body>
+</html>
