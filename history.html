@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Build History — CLIX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23080812'/><text y='75' x='50' text-anchor='middle' font-size='62' fill='%232eb9df'>✦</text></svg>"/>
+  <style>
+    :root{--bg:#080812;--bg-card:#0d0d1a;--bg-hover:#111122;--border:rgba(255,255,255,.07);--border-hi:rgba(46,185,223,.22);--t1:#e8e8f0;--t2:#7878a0;--t3:#3a3a58;--ac:#2eb9df;--ac-dim:rgba(46,185,223,.09);--ac-glow:rgba(46,185,223,.30);--red:#f7516a;--fd:'Bricolage Grotesque',sans-serif;--fb:'Inter',sans-serif;--fm:'JetBrains Mono',monospace;--nav-h:58px;--r:10px}
+    [data-theme=light]{--bg:#f5f5fb;--bg-card:#fff;--bg-hover:#eaeaf5;--border:rgba(0,0,0,.08);--border-hi:rgba(26,127,196,.22);--t1:#09090f;--t2:#50507a;--t3:#9898b8;--ac:#1a7fc4;--ac-dim:rgba(26,127,196,.08);--ac-glow:rgba(26,127,196,.22)}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh;transition:background .3s,color .3s}
+    a{text-decoration:none;color:inherit}
+    button{cursor:pointer;font-family:var(--fb);background:none;border:none;color:inherit}
+    ::selection{background:var(--ac-dim);color:var(--ac)}
+    .bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);background-size:68px 68px}
+    [data-theme=light] .bg-grid{background-image:linear-gradient(rgba(0,0,0,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.035) 1px,transparent 1px)}
+    .nav{position:sticky;top:0;z-index:100;height:var(--nav-h);display:flex;align-items:center;justify-content:space-between;padding:0 36px;background:rgba(8,8,18,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+    [data-theme=light] .nav{background:rgba(245,245,251,.90)}
+    .brand{display:flex;align-items:center;gap:10px}
+    .brand-icon{width:30px;height:30px;border-radius:7px;background:var(--ac);display:flex;align-items:center;justify-content:center;font-size:15px;color:#080812;font-weight:900}
+    .brand-name{font-family:var(--fd);font-size:18px;font-weight:800;letter-spacing:.07em}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .nav-btn{padding:7px 14px;border-radius:8px;font-size:13px;font-weight:500;color:var(--t2);transition:color .15s,background .15s}
+    .nav-btn:hover{color:var(--t1);background:var(--bg-hover)}
+    .nav-btn-primary{background:var(--ac);color:#080812;font-weight:600;transition:transform .15s,box-shadow .15s}
+    .nav-btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 16px var(--ac-glow)}
+    .theme-btn{width:32px;height:32px;border-radius:50%;background:var(--bg-hover);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--t2);transition:color .15s,transform .2s}
+    .theme-btn:hover{color:var(--t1);transform:rotate(20deg)}
+    .page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:50px 36px 80px}
+    .page-header{margin-bottom:36px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    .page-title{font-family:var(--fd);font-size:clamp(26px,4vw,42px);font-weight:800;letter-spacing:-.02em;margin-bottom:8px}
+    .page-sub{font-size:15px;color:var(--t2)}
+    .clear-all-btn{padding:8px 16px;border-radius:8px;font-size:13px;color:var(--red);border:1px solid rgba(247,81,106,.25);transition:all .15s;flex-shrink:0;margin-top:4px}
+    .clear-all-btn:hover{background:rgba(247,81,106,.10)}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+    .build-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:border-color .2s,transform .2s,box-shadow .2s}
+    .build-card:hover{border-color:var(--border-hi);transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,.4)}
+    .card-thumb{height:170px;background:var(--bg-hover);border-bottom:1px solid var(--border);overflow:hidden;position:relative}
+    .card-thumb iframe{width:200%;height:200%;transform:scale(.5);transform-origin:top left;border:none;pointer-events:none}
+    .card-thumb-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,rgba(13,13,26,.7))}
+    .card-body{padding:14px 16px}
+    .card-title{font-family:var(--fd);font-size:14px;font-weight:700;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .card-meta{display:flex;align-items:center;justify-content:space-between;font-family:var(--fm);font-size:10px;color:var(--t3)}
+    .card-type{padding:2px 7px;border-radius:4px;background:var(--ac-dim);color:var(--ac)}
+    .card-actions{display:flex;gap:6px;padding:0 16px 14px}
+    .card-act{flex:1;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:500;color:var(--t2);text-align:center;transition:all .15s;cursor:pointer}
+    .card-act:hover{border-color:var(--border-hi);color:var(--t1);background:var(--bg-hover)}
+    .card-act.primary{background:var(--ac);color:#080812;border-color:transparent}
+    .card-act.primary:hover{box-shadow:0 4px 16px var(--ac-glow)}
+    .empty-state{grid-column:1/-1;text-align:center;padding:70px 20px;display:flex;flex-direction:column;align-items:center;gap:14px}
+    .es-icon{font-size:44px;opacity:.25}
+    .es-title{font-family:var(--fd);font-size:22px;font-weight:800}
+    .es-sub{font-size:15px;color:var(--t2)}
+    .es-cta{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;background:var(--ac);color:#080812;border-radius:var(--r);font-family:var(--fd);font-size:14px;font-weight:700;transition:transform .15s,box-shadow .15s}
+    .es-cta:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--ac-glow)}
+    @media(max-width:600px){.page{padding:28px 16px 60px}.nav{padding:0 16px}.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <nav class="nav">
+    <a href="builder.html" class="brand">
+      <div class="brand-icon">✦</div>
+      <span class="brand-name">CLIX</span>
+    </a>
+    <div class="nav-right">
+      <button class="theme-btn" id="themeBtn">🌙</button>
+      <a href="builder.html" class="nav-btn-primary nav-btn">+ New build</a>
+    </div>
+  </nav>
+
+  <div class="page">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Build History</h1>
+        <p class="page-sub" id="pageSub">Your recent builds are saved in this browser.</p>
+      </div>
+      <button class="clear-all-btn" id="clearAllBtn">Clear all</button>
+    </div>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <script>
+    // Theme
+    const html=document.documentElement;
+    const tb=document.getElementById('themeBtn');
+    const applyTheme=t=>{html.setAttribute('data-theme',t);localStorage.setItem('clix-theme',t);tb.textContent=t==='dark'?'🌙':'☀️'};
+    applyTheme(localStorage.getItem('clix-theme')||'dark');
+    tb.addEventListener('click',()=>applyTheme(html.getAttribute('data-theme')==='dark'?'light':'dark'));
+
+    function getBuilds(){ return JSON.parse(localStorage.getItem('clix-history')||'[]'); }
+
+    function render(){
+      const grid   = document.getElementById('grid');
+      const builds = getBuilds();
+      grid.innerHTML = '';
+      document.getElementById('pageSub').textContent = builds.length
+        ? `${builds.length} build${builds.length!==1?'s':''} saved in this browser.`
+        : 'Your recent builds are saved in this browser.';
+
+      if(!builds.length){
+        grid.innerHTML=`<div class="empty-state"><div class="es-icon">🕒</div><h2 class="es-title">No builds yet</h2><p class="es-sub">Head to the builder and create your first site.</p><a href="builder.html" class="es-cta">Go to builder →</a></div>`;
+        return;
+      }
+
+      builds.forEach((b,idx)=>{
+        const card = document.createElement('div');
+        card.className = 'build-card';
+        const safe = (b.html||'').replace(/"/g,'&quot;');
+        card.innerHTML=`
+          <div class="card-thumb">
+            <iframe srcdoc="${safe}" sandbox="allow-scripts"></iframe>
+            <div class="card-thumb-overlay"></div>
+          </div>
+          <div class="card-body">
+            <div class="card-title">${esc(b.prompt||'Untitled')}</div>
+            <div class="card-meta"><span class="card-type">${b.type||'custom'}</span><span>${timeAgo(b.date)}</span></div>
+          </div>
+          <div class="card-actions">
+            <button class="card-act" data-action="copy" data-idx="${idx}">Copy HTML</button>
+            <button class="card-act" data-action="download" data-idx="${idx}">Download</button>
+            <a href="builder.html" class="card-act primary" onclick="loadBuild(${idx})">Open →</a>
+          </div>`;
+        grid.appendChild(card);
+      });
+    }
+
+    // Load build into builder
+    window.loadBuild = function(idx){
+      const builds = getBuilds();
+      if(builds[idx]) sessionStorage.setItem('clix-load-build', JSON.stringify(builds[idx]));
+    };
+
+    // Card actions
+    document.getElementById('grid').addEventListener('click', async e=>{
+      const btn = e.target.closest('[data-action]'); if(!btn) return;
+      const idx  = parseInt(btn.dataset.idx);
+      const b    = getBuilds()[idx]; if(!b) return;
+
+      if(btn.dataset.action==='copy'){
+        try{ await navigator.clipboard.writeText(b.html||''); btn.textContent='✓ Copied!'; setTimeout(()=>btn.textContent='Copy HTML',2000); }
+        catch{}
+      }
+      if(btn.dataset.action==='download'){
+        const zip = new JSZip();
+        zip.file('index.html', b.html||'');
+        zip.file('README.md','# Built with CLIX ✦\nhttps://clix.app\n');
+        const blob = await zip.generateAsync({type:'blob'});
+        const url  = URL.createObjectURL(blob);
+        Object.assign(document.createElement('a'),{href:url,download:'clix-site.zip'}).click();
+        URL.revokeObjectURL(url);
+      }
+    });
+
+    // Clear all
+    document.getElementById('clearAllBtn').addEventListener('click',()=>{
+      if(confirm('Delete all build history? This cannot be undone.')){
+        localStorage.removeItem('clix-history');
+        render();
+      }
+    });
+
+    const esc=s=>{const d=document.createElement('div');d.appendChild(document.createTextNode(String(s||'')));return d.innerHTML};
+    const timeAgo=iso=>{if(!iso)return'';const d=Date.now()-new Date(iso);if(d<60000)return'just now';if(d<3600000)return`${Math.floor(d/60000)}m ago`;if(d<86400000)return`${Math.floor(d/3600000)}h ago`;return new Date(iso).toLocaleDateString()};
+
+    render();
+  </script>
+</body>
+</html>
